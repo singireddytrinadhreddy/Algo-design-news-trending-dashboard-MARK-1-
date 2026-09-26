@@ -1,0 +1,43 @@
+[
+  {
+    "name": "ArtemisIV",
+    "url": "https://mastodon.social/tags/ArtemisIV",
+    "history": [
+      {
+        "day": "1787702400",
+        "uses": "4810",
+        "accounts": "2340"
+      },
+      {
+        "day": "1787616000",
+        "uses": "1200",
+        "accounts": "890"
+      }
+    ],
+    "description": "Trending hashtag regarding NASA and ESA Artemis IV lunar gateway mission update."
+  },
+  {
+    "name": "OpenSourceAI",
+    "url": "https://mastodon.social/tags/OpenSourceAI",
+    "history": [
+      {
+        "day": "1787702400",
+        "uses": "3650",
+        "accounts": "1940"
+      }
+    ],
+    "description": "Discussions surrounding new open-weights reasoning model benchmarks."
+  },
+  {
+    "name": "SolarStorm",
+    "url": "https://mastodon.social/tags/SolarStorm",
+    "history": [
+      {
+        "day": "1787702400",
+        "uses": "2890",
+        "accounts": "1620"
+      }
+    ],
+    "description": "Aurora sightings reported across northern latitudes following G4 geomagnetic storm."
+  }
+]

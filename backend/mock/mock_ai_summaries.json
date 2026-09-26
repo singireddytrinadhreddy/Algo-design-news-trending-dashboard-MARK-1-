@@ -1,0 +1,66 @@
+{
+  "default": {
+    "summary": "Trending globally across social platforms driven by breaking real-time discussions and high user engagement.",
+    "category": "Technology"
+  },
+  "youtube": {
+    "summary": "Trending on YouTube following a major viral video release with substantial view velocity and community comments.",
+    "category": "Entertainment"
+  },
+  "hackernews": {
+    "summary": "Reached the front page of Hacker News driven by intense technical discussion and developer interest.",
+    "category": "Technology"
+  },
+  "mastodon": {
+    "summary": "Trending hashtag across decentralized Mastodon instances propelled by active federated posts and boosts.",
+    "category": "Culture"
+  },
+  "bluesky": {
+    "summary": "Popular topic trending in the Bluesky Discover feed with rapid resharing and conversational replies.",
+    "category": "Breaking News"
+  },
+  "wikipedia": {
+    "summary": "One of today's most-read Wikipedia articles globally following major real-world news and cultural interest.",
+    "category": "Culture"
+  },
+  "devto": {
+    "summary": "Top trending engineering article on Dev.to with high reaction velocity and active technical comments from developers.",
+    "category": "Technology"
+  },
+  "lemmy": {
+    "summary": "Top hot discussion thread on Lemmy federated community with high upvotes and active decentralised discussion.",
+    "category": "Technology"
+  },
+  "github": {
+    "summary": "Trending open-source repository on GitHub gaining thousands of new stars this week.",
+    "category": "Technology"
+  },
+  "giphy": {
+    "summary": "Viral trending animated GIF surging in global shares and messaging reactions.",
+    "category": "Entertainment"
+  },
+  "google_trends": {
+    "summary": "Search interest is surging on Google as millions of users seek real-time updates on this developing topic.",
+    "category": "Science"
+  },
+  "instagram_news": {
+    "summary": "Covered by tech and culture journalism as a viral phenomenon and algorithmic milestone on Instagram.",
+    "category": "Technology"
+  },
+  "facebook_news": {
+    "summary": "Journalistic coverage highlighting how viral communities and mutual aid coordination on Facebook drove real-world impact.",
+    "category": "Culture"
+  },
+  "twitter_news": {
+    "summary": "Featured in news coverage after a viral discussion and collaborative thread on X sparked widespread industry reaction.",
+    "category": "Technology"
+  },
+  "reddit_news": {
+    "summary": "Journalistic reporting highlighting a major viral discovery, discussion thread, or community milestone on Reddit.",
+    "category": "Technology"
+  },
+  "twitch_news": {
+    "summary": "Featured in gaming journalism following record-breaking creator broadcasts and philanthropy marathons on Twitch.",
+    "category": "Gaming"
+  }
+}

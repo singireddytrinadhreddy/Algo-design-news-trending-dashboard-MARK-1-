@@ -1,0 +1,42 @@
+[
+  {
+    "post": {
+      "id": 14920481,
+      "name": "EU passes new directive mandating user-replaceable batteries and modular designs in all electronics",
+      "url": "https://reuters.com/technology/eu-mandates-modular-electronics-batteries-2026",
+      "body": "The European Parliament has overwhelmingly approved the Ecodesign regulations requiring standardized fastener access and 5-year spare parts availability.",
+      "published": "2026-08-26T17:00:00Z"
+    },
+    "creator": {
+      "name": "federated_citizen"
+    },
+    "community": {
+      "name": "technology@lemmy.world"
+    },
+    "counts": {
+      "score": 1840,
+      "upvotes": 1920,
+      "comments": 312
+    }
+  },
+  {
+    "post": {
+      "id": 14920482,
+      "name": "Self-hosted alternative to major streaming platforms reaches 1.0 with P2P mesh relay support",
+      "url": "https://github.com/openstream/core",
+      "body": "OpenStream 1.0 brings end-to-end encrypted live broadcasting with decentralized relay nodes.",
+      "published": "2026-08-26T14:40:00Z"
+    },
+    "creator": {
+      "name": "linux_enthusiast"
+    },
+    "community": {
+      "name": "selfhosted@lemmy.world"
+    },
+    "counts": {
+      "score": 1250,
+      "upvotes": 1310,
+      "comments": 184
+    }
+  }
+]

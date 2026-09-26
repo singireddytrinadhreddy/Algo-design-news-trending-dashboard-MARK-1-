@@ -1,0 +1,23 @@
+[
+  {
+    "article": "James_Webb_Space_Telescope",
+    "views": 482900,
+    "rank": 1,
+    "url": "https://en.wikipedia.org/wiki/James_Webb_Space_Telescope",
+    "extract": "The James Webb Space Telescope (JWST) is a space telescope designed primarily to conduct infrared astronomy."
+  },
+  {
+    "article": "UEFA_Champions_League",
+    "views": 391400,
+    "rank": 2,
+    "url": "https://en.wikipedia.org/wiki/UEFA_Champions_League",
+    "extract": "The UEFA Champions League is an annual club association football competition organised by the Union of European Football Associations."
+  },
+  {
+    "article": "Quantum_computing",
+    "views": 284100,
+    "rank": 3,
+    "url": "https://en.wikipedia.org/wiki/Quantum_computing",
+    "extract": "Quantum computing is a rapidly-emerging technology that harnesses the laws of quantum mechanics to solve problems too complex for classical computers."
+  }
+]

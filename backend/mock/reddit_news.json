@@ -1,0 +1,22 @@
+[
+  {
+    "source": {"id": "indian-express", "name": "The Indian Express"},
+    "author": "Tech & City Desk",
+    "title": "r/bangalore Reddit discussion on rental deposit reform catches Karnataka government attention",
+    "description": "A viral discussion on r/bangalore with over 3,000 comments regarding tenancy security deposits in Bengaluru, Karnataka prompted legislative review.",
+    "url": "https://indianexpress.com/article/cities/bangalore/reddit-bangalore-tenancy-deposit-reform-discussion/",
+    "urlToImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-08-26T17:00:00Z",
+    "content": "Netizens in Bengaluru detailed widespread experiences that spurred state consumer welfare attention."
+  },
+  {
+    "source": {"id": "india-today", "name": "India Today"},
+    "author": "Tech Desk",
+    "title": "r/india Reddit AMA with Pune electric vehicle startup founder trends on tech forums",
+    "description": "An open AMA session hosted on r/india by a clean mobility engineer based in Pune, Maharashtra revealed indigenous battery pack innovations.",
+    "url": "https://www.indiatoday.in/technology/news/story/reddit-r-india-ama-pune-ev-startup-battery-tech-2026",
+    "urlToImage": "https://images.unsplash.com/photo-1558441719-8b489c652756?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-08-26T12:30:00Z",
+    "content": "Engineers from across India joined the Reddit discussion to ask technical questions about fast-charging cells."
+  }
+]

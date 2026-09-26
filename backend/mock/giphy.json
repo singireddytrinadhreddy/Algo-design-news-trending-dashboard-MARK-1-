@@ -1,0 +1,35 @@
+[
+  {
+    "id": "JIX9t2j0ZTN9S",
+    "title": "Excited Cat Typing On Laptop GIF",
+    "url": "https://giphy.com/gifs/cat-typing-laptop-JIX9t2j0ZTN9S",
+    "import_datetime": "2026-08-26 15:00:00",
+    "username": "animalmemes",
+    "rating": "g",
+    "images": {
+      "original": {
+        "url": "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif",
+        "width": "480",
+        "height": "360"
+      },
+      "downsized_medium": {
+        "url": "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif"
+      }
+    }
+  },
+  {
+    "id": "3oEjI6SIIHBdRxXI40",
+    "title": "Mind Blown Galaxy Space GIF",
+    "url": "https://giphy.com/gifs/mind-blown-galaxy-3oEjI6SIIHBdRxXI40",
+    "import_datetime": "2026-08-26 12:30:00",
+    "username": "cosmicvibes",
+    "rating": "g",
+    "images": {
+      "original": {
+        "url": "https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif",
+        "width": "500",
+        "height": "281"
+      }
+    }
+  }
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "objectID": "41320011",
+    "title": "Show HN: FastSQL – In-memory columnar database written in Rust with SIMD acceleration",
+    "url": "https://github.com/fastsql/fastsql",
+    "author": "simd_fanatic",
+    "points": 842,
+    "num_comments": 234,
+    "created_at_i": 1787765000,
+    "created_at": "2026-08-26T17:23:20Z",
+    "story_text": "We built a zero-copy embedded database engine capable of filtering 100M rows in 12ms on modern AVX-512 hardware."
+  },
+  {
+    "objectID": "41320022",
+    "title": "Why we migrated from microservices back to a modular monolith",
+    "url": "https://engineering.stripe.com/posts/modular-monolith-migration-2026",
+    "author": "arch_lead",
+    "points": 1250,
+    "num_comments": 612,
+    "created_at_i": 1787760000,
+    "created_at": "2026-08-26T16:00:00Z",
+    "story_text": null
+  },
+  {
+    "objectID": "41320033",
+    "title": "WebAssembly 3.0 specification draft released with native thread pools and GC",
+    "url": "https://w3c.github.io/wasm-spec-3-draft",
+    "author": "wasm_core",
+    "points": 670,
+    "num_comments": 189,
+    "created_at_i": 1787754000,
+    "created_at": "2026-08-26T14:20:00Z",
+    "story_text": null
+  }
+]

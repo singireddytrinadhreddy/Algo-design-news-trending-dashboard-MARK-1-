@@ -1,0 +1,22 @@
+[
+  {
+    "source": {"id": "news18", "name": "News18"},
+    "author": "Gaming Desk",
+    "title": "Indian gaming streamer KingAnshu hits record 150k live viewers during Mumbai esports showdown",
+    "description": "A thrilling championship livestream broadcast from an arena in Mumbai, Maharashtra smashed regional Twitch viewership benchmarks.",
+    "url": "https://www.news18.com/buzz/mumbai-twitch-streamer-viewership-record-2026.html",
+    "urlToImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-08-26T16:15:00Z",
+    "content": "The Mumbai event highlights the explosive growth of professional streaming across India."
+  },
+  {
+    "source": {"id": "dot-esports", "name": "Dot Esports"},
+    "author": "Esports Staff",
+    "title": "Bengaluru collegiate gaming championship draws record Twitch viewership across South Asia",
+    "description": "Over 80 university teams competed in a multi-game tournament in Bengaluru, Karnataka, generating over 1.2 million hours watched on Twitch.",
+    "url": "https://dotesports.com/streaming/news/bengaluru-collegiate-gaming-championship-record-twitch",
+    "urlToImage": "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-08-26T14:00:00Z",
+    "content": "Twitch streaming metrics showed peak engagement across tech campuses in Karnataka and Maharashtra."
+  }
+]

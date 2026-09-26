@@ -1,0 +1,22 @@
+[
+  {
+    "source": {"id": "news18", "name": "News18"},
+    "author": "Trending Desk",
+    "title": "Bengaluru traffic police viral tweet on AI signal synchronization earns praise across Karnataka",
+    "description": "A viral Twitter thread from the Bengaluru Traffic Police demonstrating an 18% reduction in bottleneck delays in Karnataka was widely shared.",
+    "url": "https://www.news18.com/buzz/bengaluru-traffic-police-viral-tweet-ai-signals-2026.html",
+    "urlToImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-08-26T18:30:00Z",
+    "content": "Commuters in Bengaluru praised the transparent engineering data shared in the thread."
+  },
+  {
+    "source": {"id": "india-today", "name": "India Today"},
+    "author": "Science Desk",
+    "title": "Viral Twitter thread from Hyderabad doctors explains seasonal dengue surge and prevention tips",
+    "description": "Medical professionals at a major Hyderabad hospital shared crucial advisory tweets reaching over 5 million impressions across Telangana.",
+    "url": "https://www.indiatoday.in/trending-news/story/hyderabad-doctors-viral-twitter-thread-dengue-prevention-2026",
+    "urlToImage": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-08-26T13:45:00Z",
+    "content": "Public health agencies in Hyderabad and neighboring districts commended the viral educational initiative."
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "source": {"id": "india-today", "name": "India Today"},
+    "author": "Trending Desk",
+    "title": "Viral Instagram Reel showing street food vendor in Mumbai sparks nationwide safety debate",
+    "description": "A food safety reel recorded at a popular chowpatty stall in Mumbai, Maharashtra surpassed 40 million views on Instagram, prompting state food safety inspections.",
+    "url": "https://www.indiatoday.in/trending-news/story/mumbai-street-food-reel-viral-instagram-2026",
+    "urlToImage": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-08-26T16:45:00Z",
+    "content": "Instagram creators across Mumbai are remixing the original viral reel with contrasting hygiene reviews."
+  },
+  {
+    "source": {"id": "indian-express", "name": "The Indian Express"},
+    "author": "Express Web Desk",
+    "title": "Bengaluru techie's viral Instagram Reel on suburban train commute goes viral",
+    "description": "Commuters in Bengaluru, Karnataka celebrate a creative Instagram video highlighting quick rail transfers that beat Outer Ring Road traffic gridlock.",
+    "url": "https://indianexpress.com/article/trending/trending-in-india/bengaluru-suburban-rail-instagram-reel-viral/",
+    "urlToImage": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-08-26T14:10:00Z",
+    "content": "The clip has struck a chord with hundreds of thousands of daily office goers across the Karnataka capital."
+  }
+]

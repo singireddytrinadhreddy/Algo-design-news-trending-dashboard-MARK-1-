@@ -1,0 +1,22 @@
+[
+  {
+    "source": {"id": "indian-express", "name": "The Indian Express"},
+    "author": "Express News Service",
+    "title": "Kerala flood relief volunteers mobilize emergency medicine network across Wayanad via Facebook",
+    "description": "Civic volunteers in Wayanad, Kerala organized a rapid medicine delivery hub through local Facebook groups to assist landslide-affected families.",
+    "url": "https://indianexpress.com/article/trending/kerala-wayanad-flood-relief-facebook-groups/",
+    "urlToImage": "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-08-26T17:15:00Z",
+    "content": "Decentralized community groups on Facebook mobilized hundreds of volunteers across Kerala within hours."
+  },
+  {
+    "source": {"id": "news18", "name": "News18"},
+    "author": "Buzz Desk",
+    "title": "New Delhi heritage preservation group on Facebook uncovers forgotten Mughal stepwell",
+    "description": "Archaeology enthusiasts collaborating on a Facebook community page discovered historic water structures near Mehrauli in New Delhi.",
+    "url": "https://www.news18.com/buzz/new-delhi-facebook-group-heritage-discovery-2026.html",
+    "urlToImage": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-08-26T11:00:00Z",
+    "content": "Citizens from across the national capital are visiting the restored site following the viral post."
+  }
+]

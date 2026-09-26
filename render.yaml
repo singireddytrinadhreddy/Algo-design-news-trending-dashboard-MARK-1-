@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: socialpulse
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: MOCK_FETCH_MODE
+        value: "false"
+      - key: MOCK_AI_MODE
+        value: "false"
+      - key: LIVE_SOURCES
+        value: "hackernews,mastodon,bluesky,wikipedia,devto,lemmy,github,google_trends,instagram_news,facebook_news,twitter_news,reddit_news,twitch_news"
+      - key: PIPELINE_INTERVAL_MINUTES
+        value: "15"
+      - key: GEMINI_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: GIPHY_API_KEY
+        sync: false
+      - key: NEWSAPI_KEY
+        sync: false
+      - key: GNEWS_KEY
+        sync: false

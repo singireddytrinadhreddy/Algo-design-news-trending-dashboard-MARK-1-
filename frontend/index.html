@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SocialPulse — Multi-Platform Social Media Trending Intelligence</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+
+  <!-- Ambient Animated Layer -->
+  <div class="bg-layer" aria-hidden="true">
+    <canvas id="network-canvas"></canvas>
+    <div class="aurora aurora-1"></div>
+    <div class="aurora aurora-2"></div>
+  </div>
+
+  <!-- App Shell -->
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="top-header" role="banner">
+      <div class="brand-area">
+        <div class="logo-badge" aria-hidden="true">SP</div>
+        <div class="brand-text">
+          <h1>SocialPulse</h1>
+          <p>Multi-Platform Social Media Trending Intelligence Dashboard</p>
+        </div>
+      </div>
+
+      <div class="header-status-area">
+        <div class="status-pill" id="system-status-pill" aria-label="System status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="system-status-text">LIVE PIPELINE ACTIVE</span>
+        </div>
+        <button class="refresh-btn" id="manual-refresh-btn" aria-label="Refresh Feed" title="Refresh Feed">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </header>
+
+    <!-- Source Tabs Bar -->
+    <div class="source-tabs-wrapper" role="region" aria-label="Social Media Platforms">
+      <div class="source-tabs-scroll" id="source-tabs-container" role="tablist">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <section class="filter-bar" aria-label="Feed Filters">
+      <div class="filter-group">
+        <span class="filter-label" id="recency-label">Recency</span>
+        <div class="recency-pills" id="recency-pills" role="radiogroup" aria-labelledby="recency-label">
+          <button class="recency-btn" data-hours="6h" role="radio" aria-checked="false">Past 6h</button>
+          <button class="recency-btn" data-hours="12h" role="radio" aria-checked="false">Past 12h</button>
+          <button class="recency-btn active" data-hours="24h" role="radio" aria-checked="true">Past 24h</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label" for="category-filter">Category</label>
+        <select class="filter-select" id="category-filter" aria-label="Filter by topic category">
+          <option value="">All Categories</option>
+          <!-- Populated dynamically -->
+        </select>
+
+        <label class="filter-label" for="sort-filter">Sort</label>
+        <select class="filter-select" id="sort-filter" aria-label="Sort items">
+          <option value="recency">Most Recent</option>
+          <option value="engagement">Highest Engagement</option>
+        </select>
+      </div>
+
+      <div class="stats-counter" id="results-counter" aria-live="polite">
+        Loading items...
+      </div>
+    </section>
+
+    <!-- Main Content Area: Trends Grid -->
+    <main class="trends-grid-container" id="main-content">
+      <div class="trends-grid" id="trends-grid" aria-live="polite">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+      <nav class="pagination-area" id="pagination-controls" aria-label="Pagination">
+        <!-- Pagination buttons rendered here -->
+      </nav>
+    </main>
+
+  </div>
+
+  <!-- Detail Slide-Over Drawer -->
+  <div class="drawer-overlay" id="drawer-overlay" aria-hidden="true"></div>
+  <aside class="detail-drawer" id="detail-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" aria-hidden="true">
+    <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Close detail drawer">&times;</button>
+    <div class="drawer-content" id="drawer-content">
+      <!-- Populated dynamically by app.js -->
+    </div>
+  </aside>
+
+  <!-- Scripts -->
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

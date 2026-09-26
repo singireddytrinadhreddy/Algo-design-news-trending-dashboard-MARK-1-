@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Database & local state
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+socialpulse.db
+*.log
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Testing & IDE
+.pytest_cache/
+.coverage
+htmlcov/
+.vscode/
+.idea/
+*.swp

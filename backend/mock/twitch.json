@@ -1,0 +1,29 @@
+[
+  {
+    "id": "509658",
+    "name": "Just Chatting",
+    "box_art_url": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=60",
+    "viewers": 342000,
+    "channels": 4820,
+    "url": "https://www.twitch.tv/directory/category/just-chatting",
+    "rank": 1
+  },
+  {
+    "id": "32982",
+    "name": "Grand Theft Auto VI",
+    "box_art_url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60",
+    "viewers": 289000,
+    "channels": 3120,
+    "url": "https://www.twitch.tv/directory/category/grand-theft-auto-vi",
+    "rank": 2
+  },
+  {
+    "id": "21779",
+    "name": "League of Legends",
+    "box_art_url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?w=800&auto=format&fit=crop&q=60",
+    "viewers": 195000,
+    "channels": 2240,
+    "url": "https://www.twitch.tv/directory/category/league-of-legends",
+    "rank": 3
+  }
+]
