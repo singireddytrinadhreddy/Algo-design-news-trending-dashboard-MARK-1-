@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+import pytest
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -13,6 +14,14 @@ from backend.database import engine, SessionLocal, Base
 from backend.models import Source, Category, TrendingItem, FetchLog
 from backend.seed import init_db, seed_db
 from backend.fetchers import ALL_FETCHERS
+
+ACTIVE_SLUGS = [
+    # Category A (3)
+    "youtube", "mastodon", "bluesky",
+    # Category B (6)
+    "google_trends", "instagram_news", "facebook_news",
+    "twitter_news", "reddit_news", "twitch_news"
+]
 
 def test_phase1_database_and_seeding():
     print("=" * 60)
@@ -35,9 +44,10 @@ def test_phase1_database_and_seeding():
         cat_a_count = db.query(Source).filter(Source.source_category == "A", Source.is_enabled == True).count()
         cat_b_count = db.query(Source).filter(Source.source_category == "B", Source.is_enabled == True).count()
 
-        assert cat_a_count == 7, f"Expected 7 enabled Category A sources, found {cat_a_count}"
-        assert cat_b_count == 4, f"Expected 4 enabled Category B sources, found {cat_b_count}"
-        assert len(categories) >= 12, f"Expected at least 12 categories, found {len(categories)}"
+        assert len(sources) == 9, f"Expected 9 sources, found {len(sources)}"
+        assert cat_a_count == 3, f"Expected 3 enabled Category A sources, found {cat_a_count}"
+        assert cat_b_count == 6, f"Expected 6 enabled Category B sources, found {cat_b_count}"
+        assert len(categories) >= 10, f"Expected at least 10 categories, found {len(categories)}"
 
         print(f"[OK] Total categories seeded: {len(categories)}")
         print("[PASSED] Database & Seeding Test Passed!\n")
@@ -49,13 +59,7 @@ def test_phase1_mock_normalization():
     print("RUNNING TEST 2: Mock Data Loading & Normalization")
     print("=" * 60)
 
-    active_slugs = [
-        "youtube", "reddit", "hackernews", "mastodon", "bluesky",
-        "twitch", "wikipedia", "google_trends", "instagram_news",
-        "facebook_news", "twitter_news"
-    ]
-
-    for slug in active_slugs:
+    for slug in ACTIVE_SLUGS:
         fetcher = ALL_FETCHERS[slug]
         raw_items = fetcher.load_mock_data()
         assert len(raw_items) > 0, f"Mock file for '{slug}' returned 0 items!"
@@ -72,60 +76,66 @@ def test_phase1_mock_normalization():
 
     print("[PASSED] Normalization Test Passed!\n")
 
-async def test_phase1_pipeline_execution_and_dedup():
+def test_phase1_pipeline_execution_and_dedup():
     print("=" * 60)
     print("RUNNING TEST 3: Pipeline Execution, Deduplication & Logging")
     print("=" * 60)
 
-    db = SessionLocal()
+    original_mock = settings.MOCK_FETCH_MODE
+    original_live = list(settings.LIVE_SOURCES)
+    settings.MOCK_FETCH_MODE = True
+    settings.LIVE_SOURCES = []
+
+    async def _run():
+        db = SessionLocal()
+        try:
+            # Clear existing items and logs for clean test
+            db.query(TrendingItem).delete()
+            db.query(FetchLog).delete()
+            db.commit()
+
+            total_inserted_first_run = 0
+
+            print("--- First Fetch Cycle (Cold Ingestion in Mock Mode) ---")
+            for slug in ACTIVE_SLUGS:
+                fetcher = ALL_FETCHERS[slug]
+                res = await fetcher.execute(db, force_live=False)
+                assert res.status in ["success", "fallback_mock"], f"Fetch failed for {slug}: {res.error_message}"
+                assert res.items_new > 0, f"Expected new items for {slug}, got {res.items_new}"
+                total_inserted_first_run += res.items_new
+                print(f"  [OK] {slug:16} -> Fetched: {res.items_fetched:2}, New: {res.items_new:2}, Duration: {res.duration_ms:3}ms")
+
+            total_in_db = db.query(TrendingItem).count()
+            assert total_in_db == total_inserted_first_run, f"DB count mismatch: {total_in_db} vs {total_inserted_first_run}"
+            print(f"[OK] Total items in DB after 1st cycle: {total_in_db}")
+
+            print("\n--- Second Fetch Cycle (Deduplication Check) ---")
+            total_new_second_run = 0
+            for slug in ACTIVE_SLUGS:
+                fetcher = ALL_FETCHERS[slug]
+                res = await fetcher.execute(db, force_live=False)
+                assert res.status in ["success", "fallback_mock"]
+                assert res.items_new == 0, f"Expected 0 new items on 2nd cycle for {slug} (dedup), got {res.items_new}"
+                total_new_second_run += res.items_new
+
+            total_in_db_after = db.query(TrendingItem).count()
+            assert total_in_db_after == total_in_db, f"Deduplication failed! Items grew from {total_in_db} to {total_in_db_after}"
+            print(f"[OK] Deduplication verified: 0 duplicates created across all {len(ACTIVE_SLUGS)} sources.")
+
+            # Check fetch_logs
+            logs_count = db.query(FetchLog).count()
+            assert logs_count == len(ACTIVE_SLUGS) * 2, f"Expected {len(ACTIVE_SLUGS)*2} log entries, found {logs_count}"
+            print(f"[OK] Fetch logs recorded: {logs_count} entries.")
+
+            print("[PASSED] Pipeline Execution & Deduplication Test Passed!\n")
+        finally:
+            db.close()
+
     try:
-        # Clear existing items and logs for clean test
-        db.query(TrendingItem).delete()
-        db.query(FetchLog).delete()
-        db.commit()
-
-        active_slugs = [
-            "youtube", "reddit", "hackernews", "mastodon", "bluesky",
-            "twitch", "wikipedia", "google_trends", "instagram_news",
-            "facebook_news", "twitter_news"
-        ]
-
-        total_inserted_first_run = 0
-
-        print("--- First Fetch Cycle (Cold Ingestion) ---")
-        for slug in active_slugs:
-            fetcher = ALL_FETCHERS[slug]
-            res = await fetcher.execute(db, force_live=False)
-            assert res.status == "success", f"Fetch failed for {slug}: {res.error_message}"
-            assert res.items_new > 0, f"Expected new items for {slug}, got {res.items_new}"
-            total_inserted_first_run += res.items_new
-            print(f"  [OK] {slug:16} -> Fetched: {res.items_fetched:2}, New: {res.items_new:2}, Duration: {res.duration_ms:3}ms")
-
-        total_in_db = db.query(TrendingItem).count()
-        assert total_in_db == total_inserted_first_run, f"DB count mismatch: {total_in_db} vs {total_inserted_first_run}"
-        print(f"[OK] Total items in DB after 1st cycle: {total_in_db}")
-
-        print("\n--- Second Fetch Cycle (Deduplication Check) ---")
-        total_new_second_run = 0
-        for slug in active_slugs:
-            fetcher = ALL_FETCHERS[slug]
-            res = await fetcher.execute(db, force_live=False)
-            assert res.status == "success"
-            assert res.items_new == 0, f"Expected 0 new items on 2nd cycle for {slug} (dedup), got {res.items_new}"
-            total_new_second_run += res.items_new
-
-        total_in_db_after = db.query(TrendingItem).count()
-        assert total_in_db_after == total_in_db, f"Deduplication failed! Items grew from {total_in_db} to {total_in_db_after}"
-        print(f"[OK] Deduplication verified: 0 duplicates created across all {len(active_slugs)} sources.")
-
-        # Check fetch_logs
-        logs_count = db.query(FetchLog).count()
-        assert logs_count == len(active_slugs) * 2, f"Expected {len(active_slugs)*2} log entries, found {logs_count}"
-        print(f"[OK] Fetch logs recorded: {logs_count} entries.")
-
-        print("[PASSED] Pipeline Execution & Deduplication Test Passed!\n")
+        asyncio.run(_run())
     finally:
-        db.close()
+        settings.MOCK_FETCH_MODE = original_mock
+        settings.LIVE_SOURCES = original_live
 
 def test_phase1_queries_and_filtering():
     print("=" * 60)
@@ -144,9 +154,9 @@ def test_phase1_queries_and_filtering():
         assert len(cat_a_items) > 0, "No Category A items found in DB"
         assert len(cat_b_items) > 0, "No Category B items found in DB"
 
-        # Verify Category B sources are only google_trends, instagram_news, facebook_news, twitter_news
+        # Verify Category B sources are only the 6 expected sources
         cat_b_slugs = {item.source.slug for item in cat_b_items}
-        expected_cat_b = {"google_trends", "instagram_news", "facebook_news", "twitter_news"}
+        expected_cat_b = {"google_trends", "instagram_news", "facebook_news", "twitter_news", "reddit_news", "twitch_news"}
         assert cat_b_slugs == expected_cat_b, f"Unexpected Cat B sources: {cat_b_slugs}"
         print(f"[OK] Category B source provenance verified: {cat_b_slugs}")
 

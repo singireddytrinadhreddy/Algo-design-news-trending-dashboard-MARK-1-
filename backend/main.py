@@ -28,13 +28,27 @@ async def lifespan(app: FastAPI):
     try:
         seed_db(db)
 
-        # Cold start check: if 0 items in DB, run initial ingestion sweep
-        items_count = db.query(TrendingItem).count()
-        if items_count == 0:
-            print("[Startup] Database has 0 items. Running initial cold-start fetch sweep...")
+        from datetime import datetime, timedelta
+        # Freshness check: ensure all enabled platforms have recent items within the last 12 hours
+        now = datetime.utcnow()
+        recent_cutoff = now - timedelta(hours=12)
+        enabled_sources = db.query(Source).filter(Source.is_enabled == True).all()
+
+        needs_refresh = False
+        for s in enabled_sources:
+            s_count = db.query(TrendingItem).filter(
+                TrendingItem.source_id == s.id,
+                TrendingItem.fetched_at >= recent_cutoff
+            ).count()
+            if s_count == 0:
+                needs_refresh = True
+                break
+
+        if needs_refresh or db.query(TrendingItem).count() == 0:
+            print("[Startup] Platform feeds are missing or older than 12h. Running comprehensive startup fetch sweep...")
             await run_pipeline(db, force_live=False)
             await process_unprocessed_items(db, limit=100)
-            print(f"[Startup] Ingestion completed. DB now contains {db.query(TrendingItem).count()} items.")
+            print(f"[Startup] Ingestion completed. DB now contains {db.query(TrendingItem).count()} items across all platforms.")
     finally:
         db.close()
 

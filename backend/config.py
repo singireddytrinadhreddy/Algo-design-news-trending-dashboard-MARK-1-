@@ -22,7 +22,7 @@ class Settings:
     LIVE_SOURCES: list[str] = [
         s.strip().lower() for s in os.getenv(
             "LIVE_SOURCES",
-            "hackernews,mastodon,bluesky,wikipedia,devto,lemmy,github,google_trends,instagram_news,facebook_news,twitter_news,reddit_news,twitch_news"
+            "youtube,mastodon,bluesky,google_trends,instagram_news,facebook_news,twitter_news,reddit_news,twitch_news"
         ).split(",") if s.strip()
     ]
 

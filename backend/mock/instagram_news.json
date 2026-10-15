@@ -6,7 +6,7 @@
     "description": "A food safety reel recorded at a popular chowpatty stall in Mumbai, Maharashtra surpassed 40 million views on Instagram, prompting state food safety inspections.",
     "url": "https://www.indiatoday.in/trending-news/story/mumbai-street-food-reel-viral-instagram-2026",
     "urlToImage": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=60",
-    "publishedAt": "2026-08-26T16:45:00Z",
+    "publishedAt": "2026-10-10T11:45:00Z",
     "content": "Instagram creators across Mumbai are remixing the original viral reel with contrasting hygiene reviews."
   },
   {
@@ -16,7 +16,47 @@
     "description": "Commuters in Bengaluru, Karnataka celebrate a creative Instagram video highlighting quick rail transfers that beat Outer Ring Road traffic gridlock.",
     "url": "https://indianexpress.com/article/trending/trending-in-india/bengaluru-suburban-rail-instagram-reel-viral/",
     "urlToImage": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&auto=format&fit=crop&q=60",
-    "publishedAt": "2026-08-26T14:10:00Z",
+    "publishedAt": "2026-10-10T10:10:00Z",
     "content": "The clip has struck a chord with hundreds of thousands of daily office goers across the Karnataka capital."
+  },
+  {
+    "source": {"id": "ndtv", "name": "NDTV"},
+    "author": "Offbeat Desk",
+    "title": "Kerala college dance troupe's Onam celebration Instagram Reel clocks 25 million views",
+    "description": "Students in Kochi, Kerala blend classical folk steps with contemporary beats in an electrifying campus performance praised by international creators.",
+    "url": "https://www.ndtv.com/trends/kerala-college-onam-dance-reel-viral-instagram-2026",
+    "urlToImage": "https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-10-10T09:20:00Z",
+    "content": "The performance has become one of the most shared festive reels from southern India this season."
+  },
+  {
+    "source": {"id": "news18", "name": "News18"},
+    "author": "Buzz Desk",
+    "title": "Delhi Metro aesthetic timelapse Reel by architectural student trends across India",
+    "description": "Visual artist captures the futuristic glass canopy and architectural geometry of New Delhi transit stations in a viral Instagram reel.",
+    "url": "https://www.news18.com/buzz/delhi-metro-aesthetic-reel-viral-instagram-2026.html",
+    "urlToImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-10-10T08:15:00Z",
+    "content": "Viewers marvelled at the cinematic color grade that transformed daily commutes into art."
+  },
+  {
+    "source": {"id": "the-hindu", "name": "The Hindu"},
+    "author": "Culture Reporter",
+    "title": "Chennai heritage filter and carnatic remix creates trending audio wave on Instagram",
+    "description": "Musicians from Chennai, Tamil Nadu fuse veena ragas with lo-fi beats, generating over 100,000 creator reels across South Asia.",
+    "url": "https://www.thehindu.com/entertainment/chennai-carnatic-lo-fi-instagram-audio-trend/article2026.ece",
+    "urlToImage": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-10-10T06:50:00Z",
+    "content": "The audio trend demonstrates the vibrant intersection of classical Indian art and digital youth culture."
+  },
+  {
+    "source": {"id": "mint", "name": "Mint"},
+    "author": "Tech Desk",
+    "title": "Meta rolls out creator monetization upgrades on Instagram for Indian micro-influencers",
+    "description": "New in-stream revenue tools and performance bonuses announced for digital creators operating outside metro hubs across Tier-2 Indian cities.",
+    "url": "https://www.livemint.com/technology/meta-instagram-creator-tools-india-monetization-2026",
+    "urlToImage": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-10-10T05:30:00Z",
+    "content": "Digital strategists highlight the accelerated economic impact of regional content in India."
   }
 ]

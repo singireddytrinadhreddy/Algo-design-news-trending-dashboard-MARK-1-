@@ -1,18 +1,18 @@
 [
   {
-    "id": "IN_YT_01",
+    "id": "DLA_64yz8Ss",
     "snippet": {
-      "publishedAt": "2026-08-26T18:00:00Z",
+      "publishedAt": "2026-10-10T12:00:00Z",
       "channelId": "UCISRO_HQ",
-      "title": "ISRO Chandrayaan-4 Space Mission Briefing Live from Bengaluru Headquarters",
-      "description": "Live press conference and technical mission review from the ISRO Telemetry and Control Center in Bengaluru, Karnataka detailing lunar sample return protocols.",
+      "title": "ISRO Space Mission Briefing Live from Bengaluru Headquarters",
+      "description": "Live technical mission briefing from the ISRO Telemetry and Control Center in Bengaluru, Karnataka detailing scientific payloads and mission milestones.",
       "thumbnails": {
         "high": {
           "url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=60"
         }
       },
       "channelTitle": "ISRO Official",
-      "tags": ["ISRO", "Bengaluru", "Space", "Chandrayaan", "Science"],
+      "tags": ["ISRO", "Bengaluru", "Space", "Science"],
       "categoryId": "28"
     },
     "statistics": {
@@ -22,9 +22,9 @@
     }
   },
   {
-    "id": "IN_YT_02",
+    "id": "1kky43k5Dk8",
     "snippet": {
-      "publishedAt": "2026-08-26T15:30:00Z",
+      "publishedAt": "2026-10-10T11:30:00Z",
       "channelId": "UCBollywood_HQ",
       "title": "Official Blockbuster Teaser Launch Event Live in Mumbai",
       "description": "Star-studded grand trailer launch fan event in Mumbai, Maharashtra drawing thousands of attendees and millions of concurrent live viewers across India.",
@@ -44,9 +44,9 @@
     }
   },
   {
-    "id": "IN_YT_03",
+    "id": "8Z1eMy2FoX4",
     "snippet": {
-      "publishedAt": "2026-08-26T12:00:00Z",
+      "publishedAt": "2026-10-10T10:00:00Z",
       "channelId": "UCCricket_India",
       "title": "India vs Australia Grand Championship Match Highlights from Ahmedabad Stadium",
       "description": "Historic final over thriller match highlights in front of 130,000 roaring cricket fans at Narendra Modi Stadium in Ahmedabad, Gujarat.",
@@ -63,6 +63,94 @@
       "viewCount": "15654000",
       "likeCount": "1294000",
       "commentCount": "112400"
+    }
+  },
+  {
+    "id": "2ePf9rue1Ao",
+    "snippet": {
+      "publishedAt": "2026-10-10T09:15:00Z",
+      "channelId": "UCTechIndian_HQ",
+      "title": "Revolutionary AI Phone Launch Event: Live Demo from New Delhi Tech Expo",
+      "description": "First comprehensive hands-on look at next-generation AI hardware, real-time voice translation, and silicon upgrades at Bharat Mandapam, New Delhi.",
+      "thumbnails": {
+        "high": {
+          "url": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=60"
+        }
+      },
+      "channelTitle": "Geekyranjit Tech",
+      "tags": ["New Delhi", "Technology", "Smartphones", "AI"],
+      "categoryId": "28"
+    },
+    "statistics": {
+      "viewCount": "3412000",
+      "likeCount": "241000",
+      "commentCount": "18200"
+    }
+  },
+  {
+    "id": "fJ9rUzIMcZQ",
+    "snippet": {
+      "publishedAt": "2026-10-10T08:30:00Z",
+      "channelId": "UCGamingIndia",
+      "title": "Battlegrounds Mobile India Grand Finals: Championship Decider Match",
+      "description": "Electrifying championship match live from the indoor arena in Hyderabad, Telangana as 16 esports teams battle for the ultimate title.",
+      "thumbnails": {
+        "high": {
+          "url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60"
+        }
+      },
+      "channelTitle": "Krafton India Esports",
+      "tags": ["Hyderabad", "Gaming", "BGMI", "Esports"],
+      "categoryId": "20"
+    },
+    "statistics": {
+      "viewCount": "5890000",
+      "likeCount": "412000",
+      "commentCount": "39500"
+    }
+  },
+  {
+    "id": "L_LUpnjgPso",
+    "snippet": {
+      "publishedAt": "2026-10-10T07:45:00Z",
+      "channelId": "UCNewsNational",
+      "title": "National Highway Infrastructure Mega Project Opens in Western Ghats, Kerala",
+      "description": "Special ground documentary on the state-of-the-art tunnel bypass and ecological wildlife corridor inaugurated across Wayanad and Kozhikode, Kerala.",
+      "thumbnails": {
+        "high": {
+          "url": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=60"
+        }
+      },
+      "channelTitle": "DD News India",
+      "tags": ["Kerala", "Infrastructure", "Breaking News", "Development"],
+      "categoryId": "25"
+    },
+    "statistics": {
+      "viewCount": "2190000",
+      "likeCount": "154000",
+      "commentCount": "9800"
+    }
+  },
+  {
+    "id": "kJQP7kiw5Fk",
+    "snippet": {
+      "publishedAt": "2026-10-10T06:00:00Z",
+      "channelId": "UCStreetFoodIndia",
+      "title": "Ultimate Kolkata Heritage Street Food Tour: 100-Year-Old Secret Recipes",
+      "description": "Exploring iconic colonial-era confectioneries and legendary kathi roll destinations across College Street and Park Street in Kolkata, West Bengal.",
+      "thumbnails": {
+        "high": {
+          "url": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=60"
+        }
+      },
+      "channelTitle": "India Food Explorer",
+      "tags": ["Kolkata", "Food", "Culture", "West Bengal"],
+      "categoryId": "24"
+    },
+    "statistics": {
+      "viewCount": "4320000",
+      "likeCount": "320000",
+      "commentCount": "23100"
     }
   }
 ]

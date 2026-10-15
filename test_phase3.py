@@ -41,12 +41,11 @@ def test_phase3_frontend_delivery():
         assert len(resp.text) > 50
         print(f"[OK] {asset:25} -> {resp.status_code} ({len(resp.text)} bytes)")
 
-    # 3. Test All 11 SVG Platform Icons
-    print("\n--- 3. Testing 11 Platform SVG Icons ---")
+    # 3. Test Active Platform SVG Icons
+    print("\n--- 3. Testing Platform SVG Icons ---")
     icons = [
-        "youtube.svg", "reddit.svg", "hackernews.svg", "mastodon.svg",
-        "bluesky.svg", "twitch.svg", "wikipedia.svg", "google-trends.svg",
-        "instagram.svg", "facebook.svg", "twitter.svg"
+        "youtube.svg", "mastodon.svg", "bluesky.svg", "google-trends.svg",
+        "instagram.svg", "facebook.svg", "twitter.svg", "reddit.svg", "twitch.svg"
     ]
     for icon in icons:
         path = f"/static/assets/icons/{icon}"

@@ -1,8 +1,8 @@
 # SocialPulse — Multi-Platform Social Media Trending Intelligence Dashboard
 
-SocialPulse is an AI-augmented, multi-platform social media intelligence dashboard that aggregates, normalizes, categorizes, and summarizes real-time trending topics across 15 platforms side-by-side.
+SocialPulse is an AI-augmented, multi-platform social media intelligence dashboard that aggregates, normalizes, categorizes, and summarizes real-time trending topics across 9 platforms side-by-side.
 
-Designed with rigorous provenance standards, SocialPulse enforces a strict architectural taxonomy separating direct, verified first-party platform data (**Category A**) from derived journalistic reporting and search interest signals (**Category B**).
+Designed with rigorous provenance standards, SocialPulse enforces a strict architectural taxonomy separating direct, verified first-party platform data (**Category A**) from derived journalistic reporting and search interest signals (**Category B**). All data is genuine: no fabricated locations, no fake articles, and authentic publication timestamps.
 
 ---
 
@@ -10,17 +10,11 @@ Designed with rigorous provenance standards, SocialPulse enforces a strict archi
 
 To ensure complete transparency, data integrity, and academic honesty, SocialPulse never mocks or scrapes in a way that misrepresents data provenance:
 
-### Category A — Direct Official APIs (9 Platforms)
-First-party data ingested directly from platform APIs with authentic engagement metrics (views, stars, upvotes, reactions):
-1. **YouTube** — Official YouTube Data API v3 (`videos.list?chart=mostPopular`)
-2. **Hacker News** — Official Algolia HN API (`search_by_date?tags=front_page`)
-3. **Mastodon** — Official Federated Trends API (`/api/v1/trends/tags`, `/api/v1/trends/statuses`)
-4. **Bluesky** — Official AT Protocol AppView Trends API (`app.bsky.unspecced.getTaggedSuggestions`)
-5. **Wikipedia** — Official Wikimedia Daily Pageviews API
-6. **Dev.to** — Official Public API (`/api/articles?top=1`)
-7. **Lemmy** — Official Federated API (`https://lemmy.world/api/v3/post/list?sort=Hot`)
-8. **GitHub Trending** — Official GitHub REST Search API (`/search/repositories`)
-9. **Giphy** — Official Giphy Trending API (`/v1/gifs/trending`)
+### Category A — Direct Official APIs (3 Platforms)
+First-party data ingested directly from platform APIs with authentic engagement metrics (views, posts, interactions):
+1. **YouTube** — Official YouTube Data API v3: Dual-list fetch merging `chart=mostPopular` (India, `regionCode=IN`) and `videoCategoryId=25` (News & Politics) with dedicated `[Trending in News]` markers. Recency is anchored to chart snapshot time (`fetched_at`), displaying genuine publication dates separately.
+2. **Mastodon** — Official Federated Trends API (`/api/v1/trends/tags`, `/api/v1/trends/statuses`) capturing decentralized Fediverse discourse.
+3. **Bluesky** — Official AT Protocol AppView Trends API (`app.bsky.unspecced.getTaggedSuggestions`) tracking viral decentralized network topics.
 
 *Card Styling:* Solid cyan/platform-colored border, **"OFFICIAL API"** badge, filled-dot indicator, and direct platform action link.
 
@@ -28,23 +22,56 @@ First-party data ingested directly from platform APIs with authentic engagement 
 
 ### Category B — Derived / Journalistic Signals (6 Platforms)
 Journalistic media coverage and search interest signals representing cultural and viral trends for platforms without open public trending endpoints:
-10. **Google Trends** — Real-time Search Interest via Google Trends Live RSS Feed
-11. **News Coverage: Instagram** — Verified tech & culture journalism covering Instagram viral trends
-12. **News Coverage: Facebook** — Verified journalism covering Facebook communities and viral posts
-13. **News Coverage: X (Twitter)** — Verified journalism covering trending topics and viral discourse on X
-14. **News Coverage: Reddit** — Verified journalism covering viral Reddit discoveries and discussions
-15. **News Coverage: Twitch** — Verified gaming journalism covering record-breaking livestreams and creators
+4. **Google Trends** — Real-time Search Interest via Google Trends Live RSS, enriched with state-level regional interest data via PyTrends for top Indian search trends.
+5. **News Coverage: Instagram** — Verified tech & culture journalism covering Instagram viral trends, Reels, and creator discussions.
+6. **News Coverage: Facebook** — Verified journalism covering Facebook communities, viral posts, and public debates.
+7. **News Coverage: X (Twitter)** — Verified journalism covering trending topics, viral tweets, and community discourse on X.
+8. **News Coverage: Reddit** — Verified journalism covering viral Reddit discoveries, thread discussions, and community reactions.
+9. **News Coverage: Twitch** — Verified gaming journalism covering record-breaking livestreams, esports tournaments, and streamer developments.
 
 *Card Styling:* Dashed amber border, bold **"SEARCH INTEREST"** or **"NEWS COVERAGE"** badge, diamond indicator, and explicit **"Read Article →"** or **"Explore on Google Trends →"** call to action (never misleading users into thinking it is a direct social post).
+
+---
+
+## 📰 Scaled Journalism & News Coverage Engine
+
+Category B news coverage uses an extensible, config-driven engine (`backend/services/news_sources.py` & `backend/services/news_coverage.py`):
+- **30+ Verified Outlets:** Covers leading national Indian news desks (*The Indian Express, News18, India Today, NDTV Profit, The Hindu, Mint, Times of India, Firstpost, Economic Times, Telangana Today, Business Standard, ABP Live, Moneycontrol, Scroll, Deccan Chronicle, MediaNama, Inc42, YourStory, Digit*) and international tech/gaming desks (*TechCrunch, The Verge, Social Media Today, Engadget, Mashable, 9to5Mac, 9to5Google, Ars Technica, Polygon, Esports Insider, GamesRadar*).
+- **RSS-First Architecture:** Prefers official RSS/Atom feeds for reliability and courtesy, falling back to HTML section scraping only when feeds are unavailable. Outlets returning 403/404 are logged in `DROPPED_OUTLETS_LOG`.
+- **Google News RSS Multi-Query Ingestion:** Runs 4–6 targeted search query variants per platform concurrently, with automated decoding of Google News redirect URLs to original publisher articles via `googlenewsdecoder`.
+- **Strict Content Validation:** Ensures every item is genuine third-party journalism (rejecting bare social links, homepages, or unresolved Google redirects) and strictly relevant to platform trending topics.
+- **Deduplication & Recency:** Normalized URL deduplication combined with token-based headline overlap detection (>80% similarity). Genuine publication dates and lead images (`og:image`) are extracted from metadata.
+- **Concurrency & Courtesy:** Shared concurrency semaphore (8), 6s per-site timeouts, and an in-memory 10-minute cache prevent hammering publisher servers.
+
+---
+
+## 📍 Trending Region Intelligence & Honest Fallback Chain
+
+Every card and the inspection drawer display a resolved trending region with an honest provenance basis (`TrendRegion`: label, scope, basis):
+1. **Local Scope (`📍 {City, State}`):** Assigned when specific Indian locations (cities, districts, or states like *Bengaluru, Karnataka*, *Mumbai*, *Warangal, Telangana*, *Karimnagar*) are detected from article text or Gemini analysis. Basis: *"Location detected from the story content"*.
+2. **Country Scope (`📍 India`):** Assigned when an article relates to nationwide Indian events, or when ingested from India-filtered queries (Google Trends `geo=IN` or YouTube `regionCode=IN`). Basis: *"Nationwide Indian story"* or *"This source is queried for India (geo/region = IN)"*.
+3. **Global Scope (`🌐 Global`):** Assigned when the source or topic has no geographic filter or is international. Basis: *"No regional filter available for this source"*.
+4. **Interactive UI:** Region pills feature tooltips showing the exact resolution basis. The slide-over drawer includes a dedicated `.region-box` with cyan accenting detailing the region and basis. A UI dropdown filter allows filtering by *All*, *India-Specific*, or *Global*.
+
+---
+
+## ⚡ Scaled Gemini AI Intelligence
+
+- **Batch Processing:** Processes 8–10 trending items per Gemini prompt, returning structured JSON arrays. This increases processing throughput from ~5 items/min to 40–50 items/min under free-tier limits.
+- **Model Fallback Chain:** Automatically fails over across `gemini-flash-lite-latest`, `gemini-3.5-flash-lite`, `gemini-flash-latest`, `gemini-3.7-flash`, and `gemini-3.6-flash` on HTTP 429/503 errors.
+- **Single-Item Fallback:** If a batch response omits any item or fails validation, single-item calls are triggered exclusively for the missing items.
+- **Strict Accuracy & Hedging:** Preserves unverified claims (*"Reportedly...", "According to unverified social media claims..."*), categorizes creator/streaming content under Gaming or Entertainment, and prohibits generic boilerplate summaries.
+- **Honest Failures:** Items that fail AI analysis remain `ai_processed=False` to be retried by the background AI sweep; no fake or mock summaries are ever inserted in live mode.
 
 ---
 
 ## 🛠️ Technology Stack
 
 - **Backend:** Python 3.11+, FastAPI, SQLAlchemy ORM, SQLite with Write-Ahead Logging (`WAL` mode with `PRAGMA busy_timeout=5000`), Pydantic v2.
-- **AI Intelligence:** Google Gemini AI models (`gemini-flash-latest`, `gemini-3.5-flash-lite`, `gemini-3.7-flash`) with structured JSON schema outputs, automated model fallback, and sliding-window rate limiting.
-- **Background Scheduler:** APScheduler (asyncio) with staggered execution intervals per source.
-- **Frontend:** Vanilla JavaScript SPA (Zero-build, no Node.js required), CSS Custom Properties, Canvas Particle Network, accessible WCAG contrast compliance.
+- **AI Engine:** Google Gemini API (`google-generativeai`) with structured JSON schemas and sliding-window rate limiting.
+- **Scraping & News:** BeautifulSoup4, lxml, feedparser, googlenewsdecoder, httpx (async).
+- **Scheduler:** APScheduler (asyncio) scheduling all enabled sources at DB-configured intervals (Cat A: 15 min, Cat B: 60 min, AI sweep: 5 min) with staggered starts.
+- **Frontend:** Vanilla JavaScript SPA (Zero-build, no Node.js required), CSS Custom Properties, interactive canvas particles, responsive drawer inspection.
 
 ---
 
@@ -71,15 +98,8 @@ cd SocialPulse
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
-*(If PowerShell restricts script execution, run: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`)*
 
-**On Windows (Command Prompt):**
-```cmd
-python -m venv venv
-venv\Scripts\activate.bat
-```
-
-**On macOS / Linux:**
+**On Linux / macOS:**
 ```bash
 python3 -m venv venv
 source venv/bin/activate
@@ -96,43 +116,28 @@ pip install -r requirements.txt
 
 ### 5. Environment Configuration (`.env`)
 
-Copy the provided `.env.example` file to create your local `.env`:
-
-**Windows (PowerShell):**
+Copy `.env.example` to create `.env`:
 ```powershell
 Copy-Item .env.example .env
 ```
 
-**Linux / macOS:**
-```bash
-cp .env.example .env
-```
-
-Open `.env` in any text editor and configure your settings:
+Configure your API keys:
 ```ini
-# App Execution Mode
 MOCK_FETCH_MODE=false
 MOCK_AI_MODE=false
-
-# Database Configuration
 DB_PATH=socialpulse.db
 PIPELINE_INTERVAL_MINUTES=15
 
 # Google Gemini API Key (Required for live AI summaries)
-# Get a free key at https://aistudio.google.com/
 GEMINI_KEY=your_gemini_api_key_here
 
-# Optional Direct Platform API Keys
+# YouTube Data API v3 Key (Required for live YouTube trends)
 YOUTUBE_API_KEY=your_google_cloud_youtube_key_here
-GIPHY_API_KEY=your_giphy_api_key_here
 ```
-
-> **Note on Security:** The `.env` file is strictly ignored in `.gitignore` and will never be tracked or pushed to GitHub. Never commit your private API keys.
 
 ---
 
 ### 6. Initialize & Seed the Database
-Run the seed script to create the SQLite schema and populate default sources and categories:
 ```bash
 python -m backend.seed
 ```
@@ -140,25 +145,30 @@ python -m backend.seed
 ---
 
 ### 7. Run the Application
-Start the FastAPI server using Uvicorn:
 ```bash
-python -m uvicorn backend.main:app --reload --port 8000
+uvicorn backend.main:app --reload --port 8000
 ```
 
-Once started, open your web browser:
-- 🌐 **Dashboard UI:** [http://localhost:8000](http://localhost:8000) (or `http://127.0.0.1:8000`)
-- 📚 **Interactive Swagger API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+Open your browser:
+- 🌐 **Dashboard UI:** [http://localhost:8000](http://localhost:8000)
+- 📚 **Swagger API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
 - ❤️ **Health Endpoint:** [http://localhost:8000/health](http://localhost:8000/health)
 
 ---
 
 ## 🧪 Testing & Verification
 
-Run the end-to-end automated verification pipeline:
+Run the complete automated test suite using pytest:
 ```bash
-python test_e2e.py
+python -m pytest
 ```
-This script executes a cold-start initialization, tests all 15 source ingestion pipelines, verifies Gemini AI batch processing, and validates all REST endpoints.
+
+Or run individual verification test suites:
+- `python test_phase1.py` — Database schema, 9-source seeding, mock normalization, and deduplication.
+- `python test_phase2.py` — API endpoints, Category A/B provenance separation, recency filtering, and source status.
+- `python test_phase3.py` — Frontend delivery, static asset integrity, and SVG icon availability.
+- `python test_phase7.py` — Sliding-window rate limiter, live Gemini analysis, and batch DB AI processing.
+- `python test_e2e.py` — Complete end-to-end cold-start pipeline verification across all 9 sources.
 
 ---
 
@@ -166,33 +176,15 @@ This script executes a cold-start initialization, tests all 15 source ingestion 
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/v1/trends` | Filter trending items by source, category, recency (6h/12h/24h), and sort |
-| `GET` | `/api/v1/trends/{id}` | Full trend item metadata including raw JSON audit payload |
-| `GET` | `/api/v1/sources` | Status and configuration for all 15 integrated sources |
-| `GET` | `/api/v1/categories` | Complete taxonomy of standard categorization topics |
-| `POST`| `/api/v1/pipeline/run` | Trigger a manual fetch cycle across all active sources |
+| `GET` | `/api/v1/trends` | Filter trending items by `source`, `source_category` (A/B), `category`, `recency` (6h/12h/24h), `region_scope` (all/india/global/local), and sort |
+| `GET` | `/api/v1/trends/{id}` | Full trend item metadata including raw JSON audit payload and resolved trending region |
+| `GET` | `/api/v1/sources` | Status and configuration for all 9 integrated sources |
+| `GET` | `/api/v1/sources/{slug}/status` | Ingestion status, error messages, and metrics for a specific source |
+| `GET` | `/api/v1/categories` | Complete taxonomy of standard categorization topics with item counts |
+| `POST`| `/api/v1/pipeline/run` | Trigger a manual fetch cycle across all active sources (`?force_live=true`) |
+| `POST`| `/api/v1/pipeline/run/{slug}` | Trigger a manual fetch cycle for a single source |
 | `POST`| `/api/v1/pipeline/process-ai` | Trigger batch Gemini AI summarization on unprocessed items |
-| `GET` | `/health` | Application health and database connection status |
-
----
-
-## 👨‍🏫 Demonstration Features & Evaluation Guide
-
-1. **Category A vs Category B Separation:**
-   - Use the segmented control at the top of the dashboard (`All Sources (15)`, `Official APIs (Cat A)`, `Derived Signals (Cat B)`).
-   - Category A shows cyan solid borders and "Official API" badges; Category B shows amber dashed borders and "NEWS COVERAGE" / "SEARCH INTEREST" badges.
-2. **Provenance & Link Integrity:**
-   - Category A cards link directly to authentic platform posts (e.g. GitHub repos, Hacker News discussions, Dev.to articles).
-   - Category B cards link directly to published third-party journalism (e.g. TechCrunch, Wired, The Guardian), avoiding misleading direct social links.
-3. **AI Intelligence & Summary Hedging:**
-   - Review the `✨ Why It's Trending` section on each card, generated by Gemini Flash.
-   - For unverified social media claims (e.g., anonymous Reddit posts), the AI summary rigorously preserves hedging language (*"Reportedly...", "According to unverified claims..."*) rather than flattening rumors into established facts.
-4. **Target Location Badges:**
-   - Geographic context is displayed with `📍 Location` chips on both the grid card and inside the slide-over detail drawer for items with identifiable geographic ties (e.g., `📍 Bengaluru, Karnataka`, `📍 Mumbai, Maharashtra`).
-5. **Data Auditability:**
-   - Click any card to open the slide-over inspection drawer and inspect the stored `raw_json` response payload directly from the platform.
-6. **Graceful Fallback Mode:**
-   - Set `MOCK_FETCH_MODE=true` in `.env` to run the dashboard completely offline without network dependencies.
+| `GET` | `/health` | Application health, database connection status, and enabled sources count |
 
 ---
 

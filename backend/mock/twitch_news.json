@@ -1,22 +1,32 @@
 [
   {
-    "source": {"id": "news18", "name": "News18"},
+    "source": {"id": "indiatoday", "name": "India Today"},
     "author": "Gaming Desk",
-    "title": "Indian gaming streamer KingAnshu hits record 150k live viewers during Mumbai esports showdown",
-    "description": "A thrilling championship livestream broadcast from an arena in Mumbai, Maharashtra smashed regional Twitch viewership benchmarks.",
-    "url": "https://www.news18.com/buzz/mumbai-twitch-streamer-viewership-record-2026.html",
+    "title": "Indian esports streamer raises Rs 25 Lakh for flood relief during 24-hour Twitch marathon",
+    "description": "Popular gaming creator based in Mumbai rallied over 100,000 concurrent viewers to support disaster assistance efforts across western India.",
+    "url": "https://www.indiatoday.in/gaming/story/indian-streamer-twitch-charity-marathon-mumbai-flood-relief-2026",
     "urlToImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60",
-    "publishedAt": "2026-08-26T16:15:00Z",
-    "content": "The Mumbai event highlights the explosive growth of professional streaming across India."
+    "publishedAt": "2026-10-10T11:00:00Z",
+    "content": "The broadcast featured special guest appearances by prominent regional creators."
   },
   {
-    "source": {"id": "dot-esports", "name": "Dot Esports"},
-    "author": "Esports Staff",
-    "title": "Bengaluru collegiate gaming championship draws record Twitch viewership across South Asia",
-    "description": "Over 80 university teams competed in a multi-game tournament in Bengaluru, Karnataka, generating over 1.2 million hours watched on Twitch.",
-    "url": "https://dotesports.com/streaming/news/bengaluru-collegiate-gaming-championship-record-twitch",
-    "urlToImage": "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&auto=format&fit=crop&q=60",
-    "publishedAt": "2026-08-26T14:00:00Z",
-    "content": "Twitch streaming metrics showed peak engagement across tech campuses in Karnataka and Maharashtra."
+    "source": {"id": "news18", "name": "News18"},
+    "author": "Tech & Gaming",
+    "title": "Twitch creator tournament in Hyderabad shatters South Asian livestream viewership records",
+    "description": "A marquee Valorant and fighting game showdown organized at HITEC City in Hyderabad, Telangana drew unprecedented live digital engagement.",
+    "url": "https://www.news18.com/buzz/twitch-hyderabad-esports-tournament-viewership-record-2026.html",
+    "urlToImage": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-10-10T08:30:00Z",
+    "content": "Organizers highlighted the rapid expansion of competitive gaming communities in India."
+  },
+  {
+    "source": {"id": "mint", "name": "Mint"},
+    "author": "Digital Economy Reporter",
+    "title": "Twitch announces localized Indian server infrastructure and regional creator support hubs",
+    "description": "Amazon-owned streaming platform activates edge nodes in Mumbai and Chennai to reduce broadcast latency for Indian content creators.",
+    "url": "https://www.livemint.com/technology/twitch-india-server-infrastructure-edge-nodes-2026",
+    "urlToImage": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-10-10T06:15:00Z",
+    "content": "The initiative aims to improve livestream performance across pan-Indian broadband networks."
   }
 ]

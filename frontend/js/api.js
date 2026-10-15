@@ -26,7 +26,7 @@ async function request(url, options = {}) {
 
 export const api = {
   // Trends
-  async getTrends({ source, sourceCategory, recency = "24h", category, sort = "recency", page = 1, perPage = 30 } = {}) {
+  async getTrends({ source, sourceCategory, recency = "24h", regionScope, category, sort = "recency", page = 1, perPage = 30 } = {}) {
     const params = new URLSearchParams();
     if (source && source !== "all") {
       if (Array.isArray(source)) {
@@ -39,6 +39,7 @@ export const api = {
       params.append("source_category", sourceCategory);
     }
     if (recency) params.append("recency", recency);
+    if (regionScope) params.append("region_scope", regionScope);
     if (category) params.append("category", category);
     if (sort) params.append("sort", sort);
     if (page) params.append("page", String(page));

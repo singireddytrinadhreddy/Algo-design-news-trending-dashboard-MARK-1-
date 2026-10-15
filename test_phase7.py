@@ -50,9 +50,9 @@ def test_gemini_live_ai_call():
 
     sample_items = [
         {
-            "title": "AWS Acquires DuckLabs",
-            "description": "DuckLabs, the creators of the DuckDB ecosystem and high-performance analytical database engine, announces acquisition by Amazon Web Services to bolster cloud analytics.",
-            "platform_name": "Hacker News",
+            "title": "ISRO launches navigation satellite successfully from Sriharikota",
+            "description": "Indian Space Research Organisation launches next-generation navigation satellite with live mission coverage on YouTube.",
+            "platform_name": "YouTube",
             "source_category": "A"
         },
         {
@@ -60,12 +60,6 @@ def test_gemini_live_ai_call():
             "description": "TechCrunch reports that Meta is rolling out a new AI-powered editing tool on Instagram that stitches raw clips into a cohesive Reel draft automatically.",
             "platform_name": "News Coverage: Instagram",
             "source_category": "B"
-        },
-        {
-            "title": "MengTo/threeui: Declarative 3D UI Library for Three.js",
-            "description": "A new viral open-source repository on GitHub providing a lightweight component framework for building 3D spatial user interfaces in WebGL.",
-            "platform_name": "GitHub Trending",
-            "source_category": "A"
         }
     ]
 
@@ -90,49 +84,52 @@ def test_gemini_live_ai_call():
     settings.MOCK_AI_MODE = original_mock
     print("\n[PASSED] Live Gemini API generation test passed!\n")
 
-async def test_batch_ai_processing():
+def test_batch_ai_processing():
     print("=" * 80)
     print("TEST 3: Batch Database AI Processing")
     print("=" * 80)
 
-    init_db()
-    db = SessionLocal()
-    seed_db(db)
+    async def _run():
+        init_db()
+        db = SessionLocal()
+        seed_db(db)
 
-    # Set some items as un-processed
-    unprocessed_count = db.query(TrendingItem).filter(TrendingItem.ai_processed == False).count()
-    print(f"[OK] Unprocessed items before sweep: {unprocessed_count}")
+        # Set some items as un-processed
+        unprocessed_count = db.query(TrendingItem).filter(TrendingItem.ai_processed == False).count()
+        print(f"[OK] Unprocessed items before sweep: {unprocessed_count}")
 
-    if unprocessed_count == 0:
-        # Reset 5 items for test
-        items = db.query(TrendingItem).limit(5).all()
-        for it in items:
-            it.ai_processed = False
-            it.ai_summary = None
-        db.commit()
-        unprocessed_count = 5
+        if unprocessed_count == 0:
+            # Reset 5 items for test
+            items = db.query(TrendingItem).limit(5).all()
+            for it in items:
+                it.ai_processed = False
+                it.ai_summary = None
+            db.commit()
+            unprocessed_count = 5
 
-    total, succeeded, failed = await process_unprocessed_items(db, limit=10)
-    print(f"[OK] Batch sweep completed -> Total: {total}, Succeeded: {succeeded}, Failed: {failed}")
-    assert succeeded > 0
-    assert failed == 0
+        total, succeeded, failed = await process_unprocessed_items(db, limit=10)
+        print(f"[OK] Batch sweep completed -> Total: {total}, Succeeded: {succeeded}, Failed: {failed}")
+        assert succeeded > 0
+        assert failed == 0
 
-    # Verify summaries were saved
-    sample_processed = db.query(TrendingItem).filter(TrendingItem.ai_processed == True).order_by(TrendingItem.fetched_at.desc()).first()
-    print(f"\n>>> Sample Database Item After AI Processing:")
-    print(f"  • ID:          {sample_processed.id}")
-    print(f"  • Title:       {sample_processed.title}")
-    print(f"  • Platform:    {sample_processed.source.display_name}")
-    print(f"  • Category:    {sample_processed.category.name if sample_processed.category else 'None'}")
-    print(f"  • AI Summary:  \"{sample_processed.ai_summary}\"")
+        # Verify summaries were saved
+        sample_processed = db.query(TrendingItem).filter(TrendingItem.ai_processed == True).order_by(TrendingItem.fetched_at.desc()).first()
+        print(f"\n>>> Sample Database Item After AI Processing:")
+        print(f"  • ID:          {sample_processed.id}")
+        print(f"  • Title:       {sample_processed.title}")
+        print(f"  • Platform:    {sample_processed.source.display_name}")
+        print(f"  • Category:    {sample_processed.category.name if sample_processed.category else 'None'}")
+        print(f"  • AI Summary:  \"{sample_processed.ai_summary}\"")
 
-    db.close()
-    print("\n[PASSED] Batch Database AI Processing test passed!")
+        db.close()
+        print("\n[PASSED] Batch Database AI Processing test passed!")
+
+    asyncio.run(_run())
 
 if __name__ == "__main__":
     test_rate_limiter_unit()
     test_gemini_live_ai_call()
-    asyncio.run(test_batch_ai_processing())
+    test_batch_ai_processing()
     print("\n" + "=" * 80)
     print("ALL PHASE 7 GEMINI AI INTEGRATION TESTS PASSED (100% GREEN)!")
     print("=" * 80)

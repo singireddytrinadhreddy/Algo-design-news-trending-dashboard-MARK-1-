@@ -4,6 +4,7 @@ from typing import Any
 
 from backend.fetchers.base import AbstractFetcher, TrendingItemCreate
 from backend.services.news_coverage import fetch_news_for_platform, generate_news_article_id
+from backend.services.mock_ai import detect_indian_location_heuristic
 
 class FacebookNewsFetcher(AbstractFetcher):
     slug = "facebook_news"
@@ -41,6 +42,7 @@ class FacebookNewsFetcher(AbstractFetcher):
                 except Exception:
                     pass
 
+            loc_india = detect_indian_location_heuristic(f"{title} {desc}")
             item = TrendingItemCreate(
                 external_id=generate_news_article_id(url),
                 title=title,
@@ -54,6 +56,7 @@ class FacebookNewsFetcher(AbstractFetcher):
                 secondary_label=None,
                 rank=rank,
                 region="global",
+                location_india=loc_india,
                 published_at=published_at,
                 raw_json=json.dumps(raw)
             )

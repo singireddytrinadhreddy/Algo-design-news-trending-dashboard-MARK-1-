@@ -12,6 +12,7 @@ const state = {
   activeSource: "all",
   sourceCategory: "all", // "all" | "A" | "B"
   recency: "24h",
+  regionScope: "",
   category: "",
   sort: "recency",
   page: 1,
@@ -24,6 +25,17 @@ const state = {
   totalPages: 1,
   isLoading: false
 };
+
+// ============================================================
+// Regional Scope Chip Helper
+// ============================================================
+function regionChipHTML(r) {
+  if (!r) return "";
+  if (r.scope === "global") {
+    return `<span class="global-pill" title="${escapeHTML(r.basis)}">🌐 GLOBAL</span>`;
+  }
+  return `<span class="location-chip" title="${escapeHTML(r.basis)}">📍 ${escapeHTML(r.label)}</span>`;
+}
 
 // ============================================================
 // Particle Network Background Animation
@@ -252,6 +264,18 @@ function renderTrendsGrid() {
       </div>
     ` : "";
 
+    let timeHTML = "";
+    if (item.source.slug === "youtube" && item.published_at) {
+      timeHTML = `
+        <div style="text-align: right; line-height: 1.25;">
+          <span class="card-time" style="color: var(--accent-cyan); font-weight: 600; font-size: 11px;">Trending ${timeAgo(item.fetched_at)}</span>
+          <span class="card-time" style="display: block; font-size: 11px; opacity: 0.85;">Published ${timeAgo(item.published_at)}</span>
+        </div>
+      `;
+    } else {
+      timeHTML = `<span class="card-time">${timeAgo(item.published_at || item.fetched_at)}</span>`;
+    }
+
     html += `
       <article class="trend-card ${cardClass}" data-id="${item.id}">
         <div>
@@ -261,7 +285,7 @@ function renderTrendsGrid() {
               <span class="source-name">${escapeHTML(item.source.display_name)}</span>
               <span class="${badgeClass}">${escapeHTML(badgeText)}</span>
             </div>
-            <span class="card-time">${timeAgo(item.published_at || item.fetched_at)}</span>
+            ${timeHTML}
           </div>
 
           <div class="card-body">
@@ -275,8 +299,7 @@ function renderTrendsGrid() {
         <div class="card-footer">
           <div class="card-tags">
             <span class="category-pill">${escapeHTML(item.category ? item.category.name : "Trending")}</span>
-            ${['mastodon', 'bluesky'].includes(item.source.slug) ? `<span class="global-pill" title="Global network trend — public API does not support regional filtering">🌐 GLOBAL</span>` : ""}
-            ${item.location_india ? `<span class="location-chip" title="Location: ${escapeHTML(item.location_india)}">📍 ${escapeHTML(item.location_india)}</span>` : ""}
+            ${regionChipHTML(item.trending_region)}
           </div>
           <a class="card-cta-btn" href="${escapeHTML(item.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">
             ${ctaCopy}
@@ -377,30 +400,38 @@ async function openDetailDrawer(itemId) {
       ctaButtonCopy = "Read Full News Article →";
     }
 
+    const timeAndAuthorText = item.author
+      ? `${escapeHTML(item.author)} · ${(item.source.slug === 'youtube' && item.published_at) ? `Published ${timeAgo(item.published_at)} (Trending ${timeAgo(item.fetched_at)})` : timeAgo(item.published_at || item.fetched_at)}`
+      : ((item.source.slug === 'youtube' && item.published_at) ? `Published ${timeAgo(item.published_at)} (Trending ${timeAgo(item.fetched_at)})` : timeAgo(item.published_at || item.fetched_at));
+
     content.innerHTML = `
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:8px;">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <img style="width:24px; height:24px;" src="/static/assets/icons/${escapeHTML(item.source.icon_filename || 'youtube.svg')}" alt="" />
-          <span style="font-weight:700; font-size:14px;">${escapeHTML(item.source.display_name)}</span>
+      <div class="drawer-header-bar">
+        <div class="drawer-source-info">
+          <img class="drawer-source-icon" src="/static/assets/icons/${escapeHTML(item.source.icon_filename || 'youtube.svg')}" alt="" />
+          <span class="drawer-source-name">${escapeHTML(item.source.display_name)}</span>
           <span class="${isCatA ? 'badge-cat-a' : 'badge-cat-b'}">${escapeHTML(item.source.source_type_label)}</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span class="category-pill">${escapeHTML(item.category ? item.category.name : "Trending")}</span>
-          ${['mastodon', 'bluesky'].includes(item.source.slug) ? `<span class="global-pill" title="Global network trend — public API does not support regional filtering">🌐 GLOBAL</span>` : ""}
-          ${item.location_india ? `<span class="location-chip">📍 ${escapeHTML(item.location_india)}</span>` : ""}
         </div>
       </div>
 
-      <h2 style="font-family:var(--font-display); font-size:22px; line-height:1.3; margin-bottom:12px; color:#fff;">
+      <h2 class="drawer-headline">
         ${escapeHTML(item.title)}
       </h2>
 
-      ${item.author ? `<p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">${escapeHTML(item.author)} · ${timeAgo(item.published_at || item.fetched_at)}</p>` : ""}
+      <div class="drawer-meta-strip">
+        <div class="drawer-tags-cluster">
+          <span class="category-pill">${escapeHTML(item.category ? item.category.name : "Trending")}</span>
+          ${regionChipHTML(item.trending_region)}
+        </div>
+        <div class="drawer-meta-author-time">
+          ${timeAndAuthorText}
+        </div>
+      </div>
 
-      ${item.location_india ? `
-        <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(45,212,200,0.12); border:1px solid rgba(45,212,200,0.3); border-radius:6px; padding:5px 12px; margin-bottom:16px; font-size:12px; color:#2dd4c8; font-weight:600;">
-          <span>📍 Target Location:</span>
-          <span style="color:#ffffff;">${escapeHTML(item.location_india)}</span>
+      ${item.trending_region ? `
+        <div class="region-box">
+          <div class="region-title">Trending Region</div>
+          <div class="region-value">${item.trending_region.scope === 'global' ? '🌐 ' : '📍 '}${escapeHTML(item.trending_region.label)}</div>
+          <div class="region-basis">${escapeHTML(item.trending_region.basis)}</div>
         </div>
       ` : ""}
 
@@ -449,6 +480,7 @@ async function fetchAndRenderTrends() {
       source: state.activeSource,
       sourceCategory: state.sourceCategory,
       recency: state.recency,
+      regionScope: state.regionScope || undefined,
       category: state.category,
       sort: state.sort,
       page: state.page,
@@ -514,6 +546,16 @@ document.addEventListener("DOMContentLoaded", () => {
         state.page = 1;
         fetchAndRenderTrends();
       });
+    });
+  }
+
+  // Region Filter Select
+  const regionSelect = document.getElementById("region-filter");
+  if (regionSelect) {
+    regionSelect.addEventListener("change", (e) => {
+      state.regionScope = e.target.value;
+      state.page = 1;
+      fetchAndRenderTrends();
     });
   }
 

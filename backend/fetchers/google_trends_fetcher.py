@@ -1,4 +1,6 @@
+import asyncio
 import json
+import logging
 from datetime import datetime
 from typing import Any
 import httpx
@@ -6,12 +8,14 @@ import feedparser
 
 from backend.fetchers.base import AbstractFetcher, TrendingItemCreate
 
+logger = logging.getLogger("socialpulse.fetchers.google_trends")
+
 class GoogleTrendsFetcher(AbstractFetcher):
     slug = "google_trends"
     source_category = "B"
 
     async def fetch_raw(self) -> list[dict]:
-        """Fetch daily search trends from Google Trends live RSS feed for India."""
+        """Fetch daily search trends from Google Trends live RSS feed for India, optionally enriched with state-level regional interest."""
         rss_url = "https://trends.google.com/trending/rss?geo=IN"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
@@ -31,6 +35,47 @@ class GoogleTrendsFetcher(AbstractFetcher):
                     "snippet": getattr(entry, "summary", f"Search interest detected for '{query}'."),
                     "published": getattr(entry, "published", "")
                 })
+
+            # Translate any non-English trending queries to English Latin script
+            non_eng_queries = [it["query"] for it in items if it.get("query")]
+            if non_eng_queries:
+                try:
+                    from backend.utils.translator import translate_trends_to_english
+                    translations = await translate_trends_to_english(non_eng_queries)
+                    for it in items:
+                        orig = it.get("query")
+                        if orig and orig in translations:
+                            it["original_query"] = orig
+                            it["query"] = translations[orig]
+                            if orig != translations[orig]:
+                                it["snippet"] = f"Trending Google Search topic in India: {translations[orig]} (Original: {orig})."
+                except Exception as e:
+                    logger.warning(f"Error during Google Trends translation: {e}")
+
+            # Optionally enrich top 10 trends with state-level data via pytrends
+            try:
+                from pytrends.request import TrendReq
+                pt = TrendReq(hl="en-US", tz=330, timeout=(5, 5))
+                for it in items[:10]:
+                    q = it.get("query")
+                    if not q:
+                        continue
+                    try:
+                        await asyncio.sleep(0.3)  # short delay between calls
+                        pt.build_payload([q], geo="IN")
+                        df = pt.interest_by_region(resolution="REGION")
+                        if not df.empty and q in df.columns:
+                            pos_df = df[df[q] > 0].sort_values(by=q, ascending=False)
+                            if not pos_df.empty:
+                                top_states = pos_df.head(3).index.tolist()
+                                if top_states:
+                                    it["location_india"] = ", ".join(top_states)
+                    except Exception:
+                        # Skip silently on rate limit or failure, never invent a region
+                        pass
+            except Exception:
+                pass
+
             return items
 
     def normalize(self, raw_items: list[dict]) -> list[TrendingItemCreate]:
@@ -73,6 +118,7 @@ class GoogleTrendsFetcher(AbstractFetcher):
                 secondary_label=None,
                 rank=raw.get("rank") or rank,
                 region="IN",
+                location_india=raw.get("location_india"),
                 published_at=pub_date,
                 raw_json=json.dumps(raw)
             )

@@ -14,5 +14,7 @@ Mastodon.py>=1.8.0
 atproto>=0.0.50
 pytrends>=4.9.0
 googlenewsdecoder>=0.1.7
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
 pytest>=8.0.0
 pytest-asyncio>=0.23.0

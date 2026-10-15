@@ -1,22 +1,32 @@
 [
   {
-    "source": {"id": "indian-express", "name": "The Indian Express"},
-    "author": "Tech & City Desk",
-    "title": "r/bangalore Reddit discussion on rental deposit reform catches Karnataka government attention",
-    "description": "A viral discussion on r/bangalore with over 3,000 comments regarding tenancy security deposits in Bengaluru, Karnataka prompted legislative review.",
-    "url": "https://indianexpress.com/article/cities/bangalore/reddit-bangalore-tenancy-deposit-reform-discussion/",
+    "source": {"id": "the-hindu", "name": "The Hindu"},
+    "author": "Tech Culture Desk",
+    "title": "Viral Reddit AMA by Indian wildlife biologists documents tiger corridor conservation",
+    "description": "Conservationists working in the Nilgiri Biosphere across Tamil Nadu and Kerala engaged thousands of Reddit users on habitat preservation techniques.",
+    "url": "https://www.thehindu.com/sci-tech/energy-and-environment/reddit-ama-indian-wildlife-biologists-nilgiris-2026/article.ece",
     "urlToImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60",
-    "publishedAt": "2026-08-26T17:00:00Z",
-    "content": "Netizens in Bengaluru detailed widespread experiences that spurred state consumer welfare attention."
+    "publishedAt": "2026-10-10T11:15:00Z",
+    "content": "The Q&A generated high upvotes on popular community forums."
   },
   {
-    "source": {"id": "india-today", "name": "India Today"},
-    "author": "Tech Desk",
-    "title": "r/india Reddit AMA with Pune electric vehicle startup founder trends on tech forums",
-    "description": "An open AMA session hosted on r/india by a clean mobility engineer based in Pune, Maharashtra revealed indigenous battery pack innovations.",
-    "url": "https://www.indiatoday.in/technology/news/story/reddit-r-india-ama-pune-ev-startup-battery-tech-2026",
-    "urlToImage": "https://images.unsplash.com/photo-1558441719-8b489c652756?w=800&auto=format&fit=crop&q=60",
-    "publishedAt": "2026-08-26T12:30:00Z",
-    "content": "Engineers from across India joined the Reddit discussion to ask technical questions about fast-charging cells."
+    "source": {"id": "indian-express", "name": "The Indian Express"},
+    "author": "Trends Reporter",
+    "title": "Subreddit debate on Bangalore rents and startup workplace flexibility sparks viral discussions",
+    "description": "A detailed budgeting breakdown posted by a young professional in Bengaluru, Karnataka triggered widespread reflections on urban work-life balance.",
+    "url": "https://indianexpress.com/article/trending/bangalore-rent-workplace-debate-reddit-viral-2026/",
+    "urlToImage": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-10-10T09:30:00Z",
+    "content": "Users shared comparative living cost insights across multiple Indian cities."
+  },
+  {
+    "source": {"id": "news18", "name": "News18"},
+    "author": "Buzz Desk",
+    "title": "Indian developers on r/developersIndia share breakthrough tips for AI productivity",
+    "description": "A collaborative mega-thread detailing local developer workflows, open source libraries, and career transitions reaches top trending rank.",
+    "url": "https://www.news18.com/buzz/developers-india-reddit-thread-ai-productivity-2026.html",
+    "urlToImage": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=60",
+    "publishedAt": "2026-10-10T07:45:00Z",
+    "content": "The thread served as an extensive resource compilation for young engineers."
   }
 ]

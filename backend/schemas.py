@@ -73,6 +73,11 @@ class EngagementMetric(BaseModel):
     value: int | None = None
     label: str | None = None
 
+class TrendRegion(BaseModel):
+    label: str
+    scope: str  # "local" | "country" | "global"
+    basis: str
+
 class TrendItemResponse(BaseModel):
     id: int
     source_id: int
@@ -86,6 +91,7 @@ class TrendItemResponse(BaseModel):
     secondary_engagement: EngagementMetric | None = None
     rank: int | None = None
     region: str = "global"
+    trending_region: TrendRegion | None = None
     source_category: str = Field(..., description="'A' = Direct API, 'B' = Derived Signal")
     published_at: datetime | None = None
     fetched_at: datetime
@@ -103,6 +109,7 @@ class FilterMetadata(BaseModel):
     source: list[str] | None = None
     source_category: str | None = None
     recency: str = "24h"
+    region_scope: str | None = None
     category: str | None = None
     sort: str = "recency"
 
