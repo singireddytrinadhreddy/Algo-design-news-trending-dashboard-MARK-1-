@@ -1,192 +1,458 @@
-# SocialPulse — Multi-Platform Social Media Trending Intelligence Dashboard
+# SocialPulse
 
-SocialPulse is an AI-augmented, multi-platform social media intelligence dashboard that aggregates, normalizes, categorizes, and summarizes real-time trending topics across 9 platforms side-by-side.
+**SocialPulse** is a multi-source trending-intelligence dashboard that brings social-platform trends, search-interest signals, and journalism about online trends into one interface. It uses a Python API and a lightweight browser frontend, with optional Gemini-powered summaries and categorization.
 
-Designed with rigorous provenance standards, SocialPulse enforces a strict architectural taxonomy separating direct, verified first-party platform data (**Category A**) from derived journalistic reporting and search interest signals (**Category B**). All data is genuine: no fabricated locations, no fake articles, and authentic publication timestamps.
+The goal is to help users explore what is gaining attention, where a story appears to be relevant, and what credible reporting says about it—while making it clear whether an item comes from a platform API, search data, or third-party news coverage.
 
----
+## 🚀 Features
 
-## 🏛️ Architecture & Source Classification
+- **Multi-platform dashboard:** Explore trends from nine sources in one place.
+- **AI-powered analysis:** Use Google Gemini to summarize and categorize trending topics.
+- **Regional intelligence:** Browse trends associated with local Indian locations, India-wide events, and global topics.
+- **Live data ingestion:** Fetch trend data from supported platform APIs, search feeds, and news sources.
+- **News coverage engine:** Collect and filter published journalism about trends involving Instagram, Facebook, X, Reddit, and Twitch.
+- **Automated refreshes:** Schedule recurring data-fetching and AI-processing jobs.
+- **Filtering and sorting:** Explore items by source, category, recency, region, and engagement.
+- **Persistent storage:** Store trends, categories, source configurations, and fetch logs in SQLite.
+- **Interactive API documentation:** Explore endpoints through FastAPI's Swagger UI.
+- **Mock development mode:** Run the dashboard with local fixture data without requiring API keys.
 
-To ensure complete transparency, data integrity, and academic honesty, SocialPulse never mocks or scrapes in a way that misrepresents data provenance:
+## 🌐 Data Sources
 
-### Category A — Direct Official APIs (3 Platforms)
-First-party data ingested directly from platform APIs with authentic engagement metrics (views, posts, interactions):
-1. **YouTube** — Official YouTube Data API v3: Dual-list fetch merging `chart=mostPopular` (India, `regionCode=IN`) and `videoCategoryId=25` (News & Politics) with dedicated `[Trending in News]` markers. Recency is anchored to chart snapshot time (`fetched_at`), displaying genuine publication dates separately.
-2. **Mastodon** — Official Federated Trends API (`/api/v1/trends/tags`, `/api/v1/trends/statuses`) capturing decentralized Fediverse discourse.
-3. **Bluesky** — Official AT Protocol AppView Trends API (`app.bsky.unspecced.getTaggedSuggestions`) tracking viral decentralized network topics.
+SocialPulse separates direct platform data from derived search-interest and news signals to make data provenance transparent.
 
-*Card Styling:* Solid cyan/platform-colored border, **"OFFICIAL API"** badge, filled-dot indicator, and direct platform action link.
+### Category A — Direct Platform APIs
 
----
+These sources retrieve data directly from their respective platform endpoints.
 
-### Category B — Derived / Journalistic Signals (6 Platforms)
-Journalistic media coverage and search interest signals representing cultural and viral trends for platforms without open public trending endpoints:
-4. **Google Trends** — Real-time Search Interest via Google Trends Live RSS, enriched with state-level regional interest data via PyTrends for top Indian search trends.
-5. **News Coverage: Instagram** — Verified tech & culture journalism covering Instagram viral trends, Reels, and creator discussions.
-6. **News Coverage: Facebook** — Verified journalism covering Facebook communities, viral posts, and public debates.
-7. **News Coverage: X (Twitter)** — Verified journalism covering trending topics, viral tweets, and community discourse on X.
-8. **News Coverage: Reddit** — Verified journalism covering viral Reddit discoveries, thread discussions, and community reactions.
-9. **News Coverage: Twitch** — Verified gaming journalism covering record-breaking livestreams, esports tournaments, and streamer developments.
+| Platform | Data collected | API key required |
+|---|---|---|
+| YouTube | Popular videos in India and News & Politics videos | Yes |
+| Mastodon | Trending hashtags and related metrics | No |
+| Bluesky | Trending topics | No |
 
-*Card Styling:* Dashed amber border, bold **"SEARCH INTEREST"** or **"NEWS COVERAGE"** badge, diamond indicator, and explicit **"Read Article →"** or **"Explore on Google Trends →"** call to action (never misleading users into thinking it is a direct social post).
+### Category B — Search Interest and News Coverage
 
----
+These sources provide search trends or published journalism about social-media activity. They are not presented as direct social posts.
 
-## 📰 Scaled Journalism & News Coverage Engine
+| Source | Data collected |
+|---|---|
+| Google Trends | Trending search queries from India |
+| Instagram News | News coverage about Instagram trends, Reels, and creators |
+| Facebook News | News coverage about Facebook trends and discussions |
+| X (Twitter) News | News coverage about trending topics and viral discussions on X |
+| Reddit News | News coverage about Reddit threads and community discussions |
+| Twitch News | News coverage about streamers, gaming, and livestreaming trends |
 
-Category B news coverage uses an extensible, config-driven engine (`backend/services/news_sources.py` & `backend/services/news_coverage.py`):
-- **30+ Verified Outlets:** Covers leading national Indian news desks (*The Indian Express, News18, India Today, NDTV Profit, The Hindu, Mint, Times of India, Firstpost, Economic Times, Telangana Today, Business Standard, ABP Live, Moneycontrol, Scroll, Deccan Chronicle, MediaNama, Inc42, YourStory, Digit*) and international tech/gaming desks (*TechCrunch, The Verge, Social Media Today, Engadget, Mashable, 9to5Mac, 9to5Google, Ars Technica, Polygon, Esports Insider, GamesRadar*).
-- **RSS-First Architecture:** Prefers official RSS/Atom feeds for reliability and courtesy, falling back to HTML section scraping only when feeds are unavailable. Outlets returning 403/404 are logged in `DROPPED_OUTLETS_LOG`.
-- **Google News RSS Multi-Query Ingestion:** Runs 4–6 targeted search query variants per platform concurrently, with automated decoding of Google News redirect URLs to original publisher articles via `googlenewsdecoder`.
-- **Strict Content Validation:** Ensures every item is genuine third-party journalism (rejecting bare social links, homepages, or unresolved Google redirects) and strictly relevant to platform trending topics.
-- **Deduplication & Recency:** Normalized URL deduplication combined with token-based headline overlap detection (>80% similarity). Genuine publication dates and lead images (`og:image`) are extracted from metadata.
-- **Concurrency & Courtesy:** Shared concurrency semaphore (8), 6s per-site timeouts, and an in-memory 10-minute cache prevent hammering publisher servers.
+The news engine uses configured publisher RSS feeds, publisher pages, and Google News RSS results. It validates article links, extracts available publication metadata, and removes duplicate or near-duplicate headlines.
 
----
+**Important:** Category B results represent journalism and search-interest signals, not verified platform-wide trending rankings. Source availability, network access, rate limits, and changes to external websites can affect results.
 
-## 📍 Trending Region Intelligence & Honest Fallback Chain
+## 🧠 How It Works
 
-Every card and the inspection drawer display a resolved trending region with an honest provenance basis (`TrendRegion`: label, scope, basis):
-1. **Local Scope (`📍 {City, State}`):** Assigned when specific Indian locations (cities, districts, or states like *Bengaluru, Karnataka*, *Mumbai*, *Warangal, Telangana*, *Karimnagar*) are detected from article text or Gemini analysis. Basis: *"Location detected from the story content"*.
-2. **Country Scope (`📍 India`):** Assigned when an article relates to nationwide Indian events, or when ingested from India-filtered queries (Google Trends `geo=IN` or YouTube `regionCode=IN`). Basis: *"Nationwide Indian story"* or *"This source is queried for India (geo/region = IN)"*.
-3. **Global Scope (`🌐 Global`):** Assigned when the source or topic has no geographic filter or is international. Basis: *"No regional filter available for this source"*.
-4. **Interactive UI:** Region pills feature tooltips showing the exact resolution basis. The slide-over drawer includes a dedicated `.region-box` with cyan accenting detailing the region and basis. A UI dropdown filter allows filtering by *All*, *India-Specific*, or *Global*.
-
----
-
-## ⚡ Scaled Gemini AI Intelligence
-
-- **Batch Processing:** Processes 8–10 trending items per Gemini prompt, returning structured JSON arrays. This increases processing throughput from ~5 items/min to 40–50 items/min under free-tier limits.
-- **Model Fallback Chain:** Automatically fails over across `gemini-flash-lite-latest`, `gemini-3.5-flash-lite`, `gemini-flash-latest`, `gemini-3.7-flash`, and `gemini-3.6-flash` on HTTP 429/503 errors.
-- **Single-Item Fallback:** If a batch response omits any item or fails validation, single-item calls are triggered exclusively for the missing items.
-- **Strict Accuracy & Hedging:** Preserves unverified claims (*"Reportedly...", "According to unverified social media claims..."*), categorizes creator/streaming content under Gaming or Entertainment, and prohibits generic boilerplate summaries.
-- **Honest Failures:** Items that fail AI analysis remain `ai_processed=False` to be retried by the background AI sweep; no fake or mock summaries are ever inserted in live mode.
-
----
+1. **Data collection:** Fetchers retrieve data from platform APIs, search feeds, and news sources.
+2. **Normalization:** Source-specific data is converted into a common trend-item format.
+3. **Validation and deduplication:** Duplicate records are identified and fetch outcomes are recorded.
+4. **Database storage:** Items, categories, sources, and fetch logs are stored in SQLite.
+5. **AI processing:** Gemini can generate summaries, categorize items, and help identify relevant locations.
+6. **Dashboard rendering:** The frontend retrieves API data and displays trends with filters and details.
+7. **Scheduled updates:** APScheduler periodically refreshes sources and processes items awaiting AI analysis.
 
 ## 🛠️ Technology Stack
 
-- **Backend:** Python 3.11+, FastAPI, SQLAlchemy ORM, SQLite with Write-Ahead Logging (`WAL` mode with `PRAGMA busy_timeout=5000`), Pydantic v2.
-- **AI Engine:** Google Gemini API (`google-generativeai`) with structured JSON schemas and sliding-window rate limiting.
-- **Scraping & News:** BeautifulSoup4, lxml, feedparser, googlenewsdecoder, httpx (async).
-- **Scheduler:** APScheduler (asyncio) scheduling all enabled sources at DB-configured intervals (Cat A: 15 min, Cat B: 60 min, AI sweep: 5 min) with staggered starts.
-- **Frontend:** Vanilla JavaScript SPA (Zero-build, no Node.js required), CSS Custom Properties, interactive canvas particles, responsive drawer inspection.
+| Component | Technology |
+|---|---|
+| Programming language | Python 3.11+ |
+| Backend API | FastAPI |
+| ASGI server | Uvicorn |
+| Database | SQLite |
+| ORM | SQLAlchemy |
+| Data validation | Pydantic |
+| AI processing | Google Gemini API |
+| HTTP requests | HTTPX |
+| RSS feed processing | feedparser |
+| HTML parsing | BeautifulSoup4, lxml |
+| News URL decoding | googlenewsdecoder |
+| Scheduling | APScheduler |
+| Frontend | HTML, CSS, vanilla JavaScript |
+| Testing | pytest, pytest-asyncio |
+| Deployment configuration | Render |
 
----
+The frontend does not require Node.js or a separate build step.
 
-## 🚀 Setup & Installation Guide
+## 📂 Project Structure
+
+```text
+SocialPulse/
+├── backend/
+│   ├── fetchers/
+│   │   ├── base.py
+│   │   ├── youtube_fetcher.py
+│   │   ├── mastodon_fetcher.py
+│   │   ├── bluesky_fetcher.py
+│   │   ├── google_trends_fetcher.py
+│   │   ├── instagram_news_fetcher.py
+│   │   ├── facebook_news_fetcher.py
+│   │   ├── twitter_news_fetcher.py
+│   │   ├── reddit_news_fetcher.py
+│   │   └── twitch_news_fetcher.py
+│   ├── mock/
+│   │   └── Local JSON fixture data
+│   ├── routers/
+│   │   ├── trends.py
+│   │   ├── sources.py
+│   │   ├── categories.py
+│   │   └── pipeline.py
+│   ├── services/
+│   │   ├── orchestrator.py
+│   │   ├── ai_processor.py
+│   │   ├── mock_ai.py
+│   │   ├── news_coverage.py
+│   │   ├── news_sources.py
+│   │   └── scheduler.py
+│   ├── utils/
+│   ├── config.py
+│   ├── database.py
+│   ├── main.py
+│   ├── models.py
+│   ├── schemas.py
+│   └── seed.py
+├── frontend/
+│   ├── assets/
+│   ├── css/
+│   │   └── styles.css
+│   ├── js/
+│   │   ├── api.js
+│   │   ├── app.js
+│   │   └── utils.js
+│   └── index.html
+├── .env.example
+├── .gitignore
+├── requirements.txt
+├── render.yaml
+├── test_phase1.py
+├── test_phase2.py
+├── test_phase3.py
+├── test_phase7.py
+└── test_e2e.py
+```
+
+## 💻 Installation and Setup
 
 ### 1. Prerequisites
-- **Python 3.11 or higher** installed ([python.org](https://www.python.org/downloads/)).
-- **Git** installed ([git-scm.com](https://git-scm.com/)).
 
----
+Install the following:
+
+- Python 3.11 or later
+- Git
+
+Python downloads: https://www.python.org/downloads/
+
+Git downloads: https://git-scm.com/downloads
+
+Verify the installations:
+
+```bash
+python --version
+git --version
+```
 
 ### 2. Clone the Repository
+
 ```bash
 git clone https://github.com/thrishi1011/SocialPulse.git
 cd SocialPulse
 ```
 
----
+### 3. Create a Virtual Environment
 
-### 3. Create and Activate Virtual Environment
+**Windows — PowerShell**
 
-**On Windows (PowerShell):**
 ```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
-**On Linux / macOS:**
+**Linux / macOS**
+
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
----
+A virtual environment keeps the project's Python dependencies separate from other Python projects.
 
 ### 4. Install Dependencies
+
+With the virtual environment activated, run:
+
 ```bash
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
----
+### 5. Configure Environment Variables
 
-### 5. Environment Configuration (`.env`)
+Create a `.env` file in the root directory.
 
-Copy `.env.example` to create `.env`:
+**Windows — PowerShell**
+
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Configure your API keys:
-```ini
+**Linux / macOS**
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` in your editor and choose one of the following configurations.
+
+#### Option A: Run in Mock Mode
+
+Mock mode is the easiest way to explore the application without configuring API credentials.
+
+Set the following values:
+
+```dotenv
+MOCK_FETCH_MODE=true
+MOCK_AI_MODE=true
+LIVE_SOURCES=
+DB_PATH=socialpulse.db
+PIPELINE_INTERVAL_MINUTES=15
+```
+
+**Important:** Set `LIVE_SOURCES` explicitly to an empty value. The application's default configuration otherwise lists the nine configured sources as live sources, which can cause live fetches even when `MOCK_FETCH_MODE=true`.
+
+Mock mode uses local JSON fixtures and mock/heuristic AI processing. It is intended for development and demonstration, not for displaying current trends.
+
+#### Option B: Run with Live Data and Gemini AI
+
+For live source fetching and Gemini-powered analysis, configure:
+
+```dotenv
 MOCK_FETCH_MODE=false
 MOCK_AI_MODE=false
 DB_PATH=socialpulse.db
 PIPELINE_INTERVAL_MINUTES=15
 
-# Google Gemini API Key (Required for live AI summaries)
-GEMINI_KEY=your_gemini_api_key_here
-
-# YouTube Data API v3 Key (Required for live YouTube trends)
-YOUTUBE_API_KEY=your_google_cloud_youtube_key_here
+YOUTUBE_API_KEY=your_youtube_api_key
+GEMINI_KEY=your_gemini_api_key
 ```
 
----
+**YouTube API key**
 
-### 6. Initialize & Seed the Database
+1. Open the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create or select a project.
+3. Enable **YouTube Data API v3**.
+4. Open the credentials section and create an API key.
+5. Add the key to `YOUTUBE_API_KEY` in `.env`.
+
+**Gemini API key**
+
+1. Open [Google AI Studio](https://aistudio.google.com/).
+2. Create an API key.
+3. Add the key to `GEMINI_KEY` in `.env`.
+
+Mastodon, Bluesky, Google Trends RSS, and the configured news-coverage sources do not require API keys for the standard nine-source pipeline, but they need network access and functioning external endpoints.
+
+The project also defines optional settings for integrations such as NewsAPI, GNews, GIPHY, Reddit, Twitch, and Pinterest. These are not required for the standard nine-source dashboard.
+
+**Security:** Never commit your `.env` file or publish API keys. The repository's `.gitignore` excludes `.env`.
+
+### 6. Initialize the Database
+
+The application initializes and seeds the SQLite database automatically during startup, so this step is normally optional.
+
+To initialize and seed it manually, run:
+
 ```bash
 python -m backend.seed
 ```
 
----
+By default, the database is stored as `socialpulse.db` in the project root.
 
-### 7. Run the Application
+### 7. Start the Application
+
+From the repository root, run:
+
 ```bash
 uvicorn backend.main:app --reload --port 8000
 ```
 
-Open your browser:
-- 🌐 **Dashboard UI:** [http://localhost:8000](http://localhost:8000)
-- 📚 **Swagger API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
-- ❤️ **Health Endpoint:** [http://localhost:8000/health](http://localhost:8000/health)
+Wait for the server to complete its startup process, then open the dashboard in your browser.
 
----
+| Service | URL |
+|---|---|
+| SocialPulse Dashboard | http://127.0.0.1:8000 |
+| Swagger API Documentation | http://127.0.0.1:8000/docs |
+| ReDoc API Documentation | http://127.0.0.1:8000/redoc |
+| Health Check | http://127.0.0.1:8000/health |
 
-## 🧪 Testing & Verification
+To stop the development server, press `Ctrl+C` in the terminal.
 
-Run the complete automated test suite using pytest:
-```bash
-python -m pytest
-```
+## 📡 API Endpoints
 
-Or run individual verification test suites:
-- `python test_phase1.py` — Database schema, 9-source seeding, mock normalization, and deduplication.
-- `python test_phase2.py` — API endpoints, Category A/B provenance separation, recency filtering, and source status.
-- `python test_phase3.py` — Frontend delivery, static asset integrity, and SVG icon availability.
-- `python test_phase7.py` — Sliding-window rate limiter, live Gemini analysis, and batch DB AI processing.
-- `python test_e2e.py` — Complete end-to-end cold-start pipeline verification across all 9 sources.
-
----
-
-## 📡 API Endpoints Overview
+The backend exposes a versioned API under `/api/v1`.
 
 | Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/v1/trends` | Filter trending items by `source`, `source_category` (A/B), `category`, `recency` (6h/12h/24h), `region_scope` (all/india/global/local), and sort |
-| `GET` | `/api/v1/trends/{id}` | Full trend item metadata including raw JSON audit payload and resolved trending region |
-| `GET` | `/api/v1/sources` | Status and configuration for all 9 integrated sources |
-| `GET` | `/api/v1/sources/{slug}/status` | Ingestion status, error messages, and metrics for a specific source |
-| `GET` | `/api/v1/categories` | Complete taxonomy of standard categorization topics with item counts |
-| `POST`| `/api/v1/pipeline/run` | Trigger a manual fetch cycle across all active sources (`?force_live=true`) |
-| `POST`| `/api/v1/pipeline/run/{slug}` | Trigger a manual fetch cycle for a single source |
-| `POST`| `/api/v1/pipeline/process-ai` | Trigger batch Gemini AI summarization on unprocessed items |
-| `GET` | `/health` | Application health, database connection status, and enabled sources count |
+|---|---|---|
+| GET | `/health` | Checks application and database health |
+| GET | `/api/v1/trends` | Retrieves and filters trending items |
+| GET | `/api/v1/trends/{item_id}` | Retrieves details about a specific trend item |
+| GET | `/api/v1/sources` | Lists configured data sources |
+| GET | `/api/v1/sources/{slug}/status` | Retrieves the fetch status of a source |
+| GET | `/api/v1/categories` | Lists categories and item counts |
+| GET | `/api/v1/pipeline/status` | Displays pipeline activity and AI-processing metrics |
+| POST | `/api/v1/pipeline/run` | Triggers ingestion across enabled sources |
+| POST | `/api/v1/pipeline/run/{slug}` | Triggers ingestion for a particular source |
+| POST | `/api/v1/pipeline/process-ai` | Processes pending items using Gemini or mock AI |
 
----
+The trends endpoint supports filtering by parameters such as source, source category, category, recency, and region scope. It also supports sorting and pagination.
+
+### Example API Requests
+
+Check application health:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+List all sources:
+
+```bash
+curl http://127.0.0.1:8000/api/v1/sources
+```
+
+Retrieve recent trends:
+
+```bash
+curl "http://127.0.0.1:8000/api/v1/trends?recency=24h"
+```
+
+Check pipeline status:
+
+```bash
+curl http://127.0.0.1:8000/api/v1/pipeline/status
+```
+
+Trigger a source-fetching cycle:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/pipeline/run"
+```
+
+Force a fetch cycle to use live fetchers:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/pipeline/run?force_live=true"
+```
+
+Live fetching can fail or fall back to fixture data when a provider is unavailable or required credentials are missing. Check the response and server logs to confirm the outcome of a fetch.
+
+For all supported query parameters and response schemas, visit:
+
+http://127.0.0.1:8000/docs
+
+## 🧪 Running Tests
+
+Run the automated test suite from the project root:
+
+```bash
+python -m pytest -q
+```
+
+The repository includes the following test modules:
+
+| Test file | Purpose |
+|---|---|
+| `test_phase1.py` | Database initialization, source/category seeding, and fetching pipeline checks |
+| `test_phase2.py` | API behavior and source/provenance checks |
+| `test_phase3.py` | Frontend delivery and static-resource checks |
+| `test_phase7.py` | Rate limiting and AI-processing checks |
+| `test_e2e.py` | End-to-end cold-start pipeline verification |
+
+Run an individual test module using:
+
+```bash
+python -m pytest test_phase1.py
+```
+
+Tests involving live services may depend on network access, third-party availability, and API quotas. Use mock mode when you need predictable local data.
+
+## 🚢 Deployment
+
+The repository contains a `render.yaml` file for configuring deployment on Render.
+
+General deployment steps:
+
+1. Push the repository to GitHub.
+2. Create a new web service on Render and connect the repository.
+3. Review the build and start commands in `render.yaml`.
+4. Configure required environment variables through the hosting provider's dashboard.
+5. Deploy and verify the service using `/health` and the dashboard URL.
+
+The deployment configuration uses Python 3.11 and starts the app with Uvicorn.
+
+Keep credentials such as `GEMINI_KEY` and `YOUTUBE_API_KEY` in the deployment environment settings, not in committed source files.
+
+Before using the application in a public production environment, review CORS settings, API access, request limits, monitoring, and logging.
+
+## 🔧 Troubleshooting
+
+### The dashboard opens but no items appear
+
+Check:
+
+- http://127.0.0.1:8000/health
+- http://127.0.0.1:8000/api/v1/sources
+- http://127.0.0.1:8000/api/v1/pipeline/status
+
+Also review the terminal output for fetch errors.
+
+### YouTube data does not load
+
+Verify that:
+
+- `YOUTUBE_API_KEY` is set correctly.
+- YouTube Data API v3 is enabled in Google Cloud.
+- The API key and project have available quota.
+
+### Gemini summaries are missing
+
+Check that `GEMINI_KEY` is configured and `MOCK_AI_MODE=false`. API quotas, unavailable models, or network issues can prevent live analysis.
+
+### Mock mode unexpectedly makes live requests
+
+Set all three values in `.env`:
+
+```dotenv
+MOCK_FETCH_MODE=true
+MOCK_AI_MODE=true
+LIVE_SOURCES=
+```
+
+Restart the server after changing environment variables.
+
+### A source is unavailable
+
+Inspect the source's status endpoint:
+
+```text
+http://127.0.0.1:8000/api/v1/sources/youtube/status
+```
+
+Replace `youtube` with the appropriate source slug. External APIs, RSS feeds, and publisher websites can change or become temporarily unavailable.
+
+## 🔐 Data and Privacy Notes
+
+- API keys should be stored in environment variables.
+- Live data and local fixture data should not be treated as interchangeable.
+- Search interest and journalism do not necessarily reflect official platform-wide rankings.
+- Regional labels are based on available source information and analysis, not guaranteed geographic tracking.
+- External publishers retain control over their content and availability.
 
 ## 📄 License
-MIT License. Developed for educational and academic intelligence research.
+
+No `LICENSE` file is currently included in this repository. Add an appropriate license file before specifying reuse or redistribution terms.
