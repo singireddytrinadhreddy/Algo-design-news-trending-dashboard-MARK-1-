@@ -62,6 +62,7 @@ class TrendingItem(Base):
     published_at = Column(DateTime, nullable=True, index=True)
     fetched_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
     category_id = Column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True, index=True)
+    topic_id = Column(Integer, ForeignKey("topics.id", ondelete="SET NULL"), nullable=True, index=True)
     ai_summary = Column(Text, nullable=True)
     location_india = Column(String(128), nullable=True)
     ai_processed = Column(Boolean, nullable=False, default=False, index=True)
@@ -71,12 +72,15 @@ class TrendingItem(Base):
     # Relationships
     source = relationship("Source", back_populates="trending_items")
     category = relationship("Category", back_populates="trending_items")
+    topic = relationship("Topic", back_populates="items")
+    snapshots = relationship("TrendSnapshot", back_populates="item", cascade="all, delete-orphan")
 
     # Constraints & Indexes
     __table_args__ = (
         UniqueConstraint("source_id", "external_id", name="uq_source_external_id"),
         Index("idx_items_source_fetched", "source_id", "fetched_at"),
         Index("idx_items_source_category_fetched", "source_category", "fetched_at"),
+        Index("idx_items_topic_id", "topic_id"),
     )
 
     def __repr__(self):
@@ -101,3 +105,45 @@ class FetchLog(Base):
 
     def __repr__(self):
         return f"<FetchLog(source_id={self.source_id}, status='{self.status}', fetched={self.items_fetched}, new={self.items_new})>"
+
+
+class Topic(Base):
+    __tablename__ = "topics"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    title = Column(String(512), nullable=False)
+    summary = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False, index=True)
+    item_count = Column(Integer, default=0, nullable=False)
+    source_count = Column(Integer, default=0, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False, index=True)
+
+    # Relationships
+    items = relationship("TrendingItem", back_populates="topic")
+
+    def __repr__(self):
+        return f"<Topic(id={self.id}, title='{self.title[:30]}...', sources={self.source_count}, items={self.item_count})>"
+
+
+class TrendSnapshot(Base):
+    __tablename__ = "trend_snapshots"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    item_id = Column(Integer, ForeignKey("trending_items.id", ondelete="CASCADE"), nullable=False, index=True)
+    source_id = Column(Integer, ForeignKey("sources.id", ondelete="CASCADE"), nullable=False, index=True)
+    captured_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    rank = Column(Integer, nullable=True)
+    engagement_value = Column(Integer, nullable=True)
+    secondary_value = Column(Integer, nullable=True)
+
+    # Relationships
+    item = relationship("TrendingItem", back_populates="snapshots")
+
+    __table_args__ = (
+        Index("idx_snapshots_item_captured", "item_id", "captured_at"),
+    )
+
+    def __repr__(self):
+        return f"<TrendSnapshot(item_id={self.item_id}, rank={self.rank}, val={self.engagement_value})>"
+

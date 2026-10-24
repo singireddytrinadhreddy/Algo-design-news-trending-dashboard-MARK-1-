@@ -30,6 +30,32 @@ async def job_ai_sweep():
     finally:
         db.close()
 
+async def job_topic_clustering():
+    """Periodic job to discover and update cross-platform macro story clusters."""
+    db = SessionLocal()
+    try:
+        from backend.services.clustering import run_topic_clustering
+        await run_topic_clustering(db)
+    except Exception as e:
+        print(f"[Scheduler] Error in topic clustering job: {e}")
+    finally:
+        db.close()
+
+async def job_prune_snapshots():
+    """Pruning job: delete snapshots older than 7 days once per hour."""
+    db = SessionLocal()
+    try:
+        from backend.models import TrendSnapshot
+        cutoff_7d = datetime.utcnow() - timedelta(days=7)
+        deleted = db.query(TrendSnapshot).filter(TrendSnapshot.captured_at < cutoff_7d).delete(synchronize_session=False)
+        db.commit()
+        if deleted > 0:
+            print(f"[Scheduler] Pruned {deleted} trend snapshots older than 7 days.")
+    except Exception as e:
+        print(f"[Scheduler] Error pruning historical snapshots: {e}")
+    finally:
+        db.close()
+
 def start_scheduler():
     """Register all periodic jobs and start the background scheduler."""
     if scheduler.running:
@@ -63,6 +89,26 @@ def start_scheduler():
             replace_existing=True
         )
         print(f"[Scheduler] Registered AI sweep every 5m, starting at {ai_start_date.strftime('%H:%M:%S')}")
+
+        # Periodic Macro Topic Clustering (every 30 minutes)
+        cluster_start_date = base_time + timedelta(seconds=max(1, len(enabled_sources)) * stagger_step_sec + 20)
+        scheduler.add_job(
+            job_topic_clustering,
+            trigger=IntervalTrigger(minutes=30, start_date=cluster_start_date),
+            id="topic_clustering",
+            replace_existing=True
+        )
+        print(f"[Scheduler] Registered Topic Clustering every 30m, starting at {cluster_start_date.strftime('%H:%M:%S')}")
+
+        # Snapshot Pruning (once every hour)
+        prune_start_date = base_time + timedelta(seconds=max(1, len(enabled_sources)) * stagger_step_sec + 40)
+        scheduler.add_job(
+            job_prune_snapshots,
+            trigger=IntervalTrigger(hours=1, start_date=prune_start_date),
+            id="snapshot_pruning",
+            replace_existing=True
+        )
+        print(f"[Scheduler] Registered Snapshot Pruning every 1h, starting at {prune_start_date.strftime('%H:%M:%S')}")
     except Exception as e:
         print(f"[Scheduler] Error configuring sources from DB: {e}")
     finally:

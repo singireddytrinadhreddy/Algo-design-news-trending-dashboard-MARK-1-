@@ -13,7 +13,14 @@ class Settings:
 
     # Database
     DB_PATH: str = os.getenv("DB_PATH", "socialpulse.db")
-    DATABASE_URL: str = f"sqlite:///{BASE_DIR / DB_PATH}"
+    _env_db_url: str = os.getenv("DATABASE_URL", "").strip()
+    if _env_db_url:
+        if _env_db_url.startswith("postgres://"):
+            DATABASE_URL: str = "postgresql://" + _env_db_url[len("postgres://"):]
+        else:
+            DATABASE_URL: str = _env_db_url
+    else:
+        DATABASE_URL: str = f"sqlite:///{BASE_DIR / DB_PATH}"
 
     # Execution Modes
     MOCK_FETCH_MODE: bool = os.getenv("MOCK_FETCH_MODE", "true").lower() in ("true", "1", "yes")

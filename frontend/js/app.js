@@ -4,6 +4,9 @@
 
 import { api } from "./api.js";
 import { timeAgo, formatNumber, escapeHTML, truncate } from "./utils.js";
+import { renderAnalyticsView } from "./views/analytics.js";
+import { renderHealthView, stopHealthAutoRefresh } from "./views/health.js";
+import { renderTopicsView } from "./views/topics.js";
 
 // ============================================================
 // Global State
@@ -17,6 +20,11 @@ const state = {
   sort: "recency",
   page: 1,
   perPage: 30,
+
+  watchlist: JSON.parse(localStorage.getItem("socialpulse_watchlist") || "[]"),
+  bookmarks: JSON.parse(localStorage.getItem("socialpulse_bookmarks") || "[]"),
+  filterWatchlistOnly: false,
+  filterSavedOnly: false,
   
   sources: [],
   categories: [],
@@ -25,6 +33,71 @@ const state = {
   totalPages: 1,
   isLoading: false
 };
+
+// ============================================================
+// Momentum & Sparkline Helpers
+// ============================================================
+function generateSparklineSVG(points, color = "#2dd4c8") {
+  if (!points || points.length < 2) return "";
+  const width = 56;
+  const height = 16;
+  const min = Math.min(...points);
+  const max = Math.max(...points);
+  const range = (max - min) || 1;
+  const step = width / (points.length - 1);
+
+  const coords = points.map((p, idx) => {
+    const x = (idx * step).toFixed(1);
+    const y = (height - 2 - ((p - min) / range) * (height - 4)).toFixed(1);
+    return `${x},${y}`;
+  });
+
+  return `
+    <svg class="sparkline-svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true">
+      <polyline fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" points="${coords.join(' ')}" />
+    </svg>
+  `;
+}
+
+function getMomentumBadgeHTML(momentum) {
+  if (!momentum) return "";
+  const map = {
+    surging: { label: "Surging", icon: "🔥", color: "#f97316", bg: "rgba(249, 115, 22, 0.15)" },
+    peaking: { label: "Peaking", icon: "⚡", color: "#facc15", bg: "rgba(250, 204, 21, 0.15)" },
+    cooling: { label: "Cooling", icon: "📉", color: "#94a3c2", bg: "rgba(148, 163, 184, 0.15)" },
+    new: { label: "New", icon: "🆕", color: "#2dd4c8", bg: "rgba(45, 212, 200, 0.15)" },
+    steady: { label: "Steady", icon: "➖", color: "#8b7cf6", bg: "rgba(139, 124, 246, 0.15)" },
+    tracking: { label: "Tracking…", icon: "", color: "var(--text-muted)", bg: "rgba(255, 255, 255, 0.05)" }
+  };
+  const conf = map[momentum.state] || map.tracking;
+  const sparkline = generateSparklineSVG(momentum.points, conf.color);
+
+  return `
+    <div class="momentum-pill" style="color: ${conf.color}; background: ${conf.bg}; border: 1px solid ${conf.color}35" title="${escapeHTML(getMomentumExplanation(momentum))}">
+      <span class="momentum-icon">${conf.icon}</span>
+      <span class="momentum-label">${conf.label}</span>
+      ${sparkline}
+    </div>
+  `;
+}
+
+function getMomentumExplanation(momentum) {
+  if (!momentum) return "No velocity data captured yet.";
+  if (momentum.state === "new") return "First observed within the last hour. Collecting baseline data.";
+  if (momentum.state === "tracking") return "Momentum needs a few fetch cycles to appear.";
+  if (momentum.state === "surging") {
+    if (momentum.rank_delta && momentum.rank_delta >= 3) return `Climbed ${momentum.rank_delta} positions on the leaderboard.`;
+    if (momentum.growth_per_hour) return `Engagement velocity is surging at +${Math.round(momentum.growth_per_hour * 100)}% per hour.`;
+    return "Rapidly rising across leaderboard signals.";
+  }
+  if (momentum.state === "cooling") {
+    if (momentum.rank_delta && momentum.rank_delta <= -3) return `Fell ${Math.abs(momentum.rank_delta)} positions on the leaderboard.`;
+    if (momentum.growth_per_hour) return `Engagement cooled at ${Math.round(momentum.growth_per_hour * 100)}% per hour.`;
+    return "Velocity is cooling off.";
+  }
+  if (momentum.state === "peaking") return "Sustaining dominant peak position near top of platform.";
+  return "Stable activity consistent with previous observation cycles.";
+}
 
 // ============================================================
 // Regional Scope Chip Helper
@@ -199,12 +272,32 @@ function renderTrendsGrid() {
   const counter = document.getElementById("results-counter");
   if (!grid) return;
 
-  if (state.items.length === 0) {
+  let displayItems = [...state.items];
+
+  // Client-side filtering for Bookmarks and Watchlist
+  if (state.filterSavedOnly) {
+    displayItems = displayItems.filter(item => state.bookmarks.includes(item.id));
+  }
+
+  if (state.filterWatchlistOnly) {
+    displayItems = displayItems.filter(item => {
+      const fullText = (item.title + " " + (item.ai_summary || "") + " " + (item.description || "")).toLowerCase();
+      return state.watchlist.some(kw => fullText.includes(kw));
+    });
+  }
+
+  if (displayItems.length === 0) {
+    const emptyMsg = state.filterSavedOnly
+      ? "You have not saved any trends yet. Click the star (☆) on any card to save it."
+      : state.filterWatchlistOnly
+      ? "No items match your active watchlist keywords. Add keywords or toggle off Watchlist filter."
+      : `No real-time items match your selected filters (Recency: ${escapeHTML(state.recency)}, Source: ${escapeHTML(state.activeSource)}). Try switching time windows or sources.`;
+
     grid.innerHTML = `
       <div class="empty-state" style="grid-column: 1 / -1;">
-        <div class="empty-icon">🔍</div>
-        <h3>No Trending Items Found</h3>
-        <p>No real-time items match your selected filters (Recency: ${escapeHTML(state.recency)}, Source: ${escapeHTML(state.activeSource)}). Try switching time windows or sources.</p>
+        <div class="empty-icon">${state.filterSavedOnly ? "⭐" : state.filterWatchlistOnly ? "★" : "🔍"}</div>
+        <h3>No Items Found</h3>
+        <p>${emptyMsg}</p>
       </div>
     `;
     if (counter) counter.innerText = `0 items found`;
@@ -212,11 +305,11 @@ function renderTrendsGrid() {
   }
 
   if (counter) {
-    counter.innerText = `Showing ${state.items.length} of ${state.total} items`;
+    counter.innerText = `Showing ${displayItems.length} of ${state.total} items`;
   }
 
   let html = "";
-  state.items.forEach(item => {
+  displayItems.forEach(item => {
     const isCatA = item.source_category === "A";
     const cardClass = isCatA ? "card-cat-a" : "card-cat-b";
     const badgeClass = isCatA ? "badge-cat-a" : "badge-cat-b";
@@ -276,16 +369,28 @@ function renderTrendsGrid() {
       timeHTML = `<span class="card-time">${timeAgo(item.published_at || item.fetched_at)}</span>`;
     }
 
+    // Watchlist check
+    const fullText = (item.title + " " + (item.ai_summary || "") + " " + (item.description || "")).toLowerCase();
+    const isWatchlistMatched = state.watchlist.length > 0 && state.watchlist.some(kw => fullText.includes(kw));
+    const isSaved = state.bookmarks.includes(item.id);
+    const watchlistCardClass = isWatchlistMatched ? "watchlist-matched" : "";
+
     html += `
-      <article class="trend-card ${cardClass}" data-id="${item.id}">
+      <article class="trend-card ${cardClass} ${watchlistCardClass}" data-id="${item.id}">
         <div>
           <div class="card-header">
             <div class="source-info">
               <img class="source-icon" src="/static/assets/icons/${escapeHTML(item.source.icon_filename || 'youtube.svg')}" alt="" />
               <span class="source-name">${escapeHTML(item.source.display_name)}</span>
               <span class="${badgeClass}">${escapeHTML(badgeText)}</span>
+              ${getMomentumBadgeHTML(item.momentum)}
             </div>
-            ${timeHTML}
+            <div style="display: flex; align-items: center; gap: 8px;">
+              ${timeHTML}
+              <button class="card-star-btn ${isSaved ? 'active' : ''}" data-star-id="${item.id}" title="${isSaved ? 'Remove saved bookmark' : 'Save bookmark'}">
+                ${isSaved ? '★' : '☆'}
+              </button>
+            </div>
           </div>
 
           <div class="card-body">
@@ -300,6 +405,8 @@ function renderTrendsGrid() {
           <div class="card-tags">
             <span class="category-pill">${escapeHTML(item.category ? item.category.name : "Trending")}</span>
             ${regionChipHTML(item.trending_region)}
+            ${isWatchlistMatched ? `<span class="watchlist-card-tag">★ Watchlist</span>` : ""}
+            ${item.topic_id ? `<a href="#/topics" class="topic-chip" onclick="event.stopPropagation()" title="Part of a cross-platform story">Part of a bigger story →</a>` : ""}
           </div>
           <a class="card-cta-btn" href="${escapeHTML(item.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">
             ${ctaCopy}
@@ -318,6 +425,16 @@ function renderTrendsGrid() {
       openDetailDrawer(id);
     });
   });
+
+  // Attach bookmark toggle handlers on star buttons
+  grid.querySelectorAll(".card-star-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = parseInt(btn.getAttribute("data-star-id"));
+      toggleBookmark(id);
+    });
+  });
+}
 }
 
 function renderPagination() {
@@ -376,6 +493,7 @@ async function openDetailDrawer(itemId) {
   try {
     const item = await api.getTrendById(itemId);
     const isCatA = item.source_category === "A";
+    const history = await api.getTrendHistory(itemId).catch(() => ({ snapshots: [] }));
 
     let provenanceDescription = "";
     let ctaButtonCopy = `View on ${escapeHTML(item.source.display_name)} →`;
@@ -404,6 +522,8 @@ async function openDetailDrawer(itemId) {
       ? `${escapeHTML(item.author)} · ${(item.source.slug === 'youtube' && item.published_at) ? `Published ${timeAgo(item.published_at)} (Trending ${timeAgo(item.fetched_at)})` : timeAgo(item.published_at || item.fetched_at)}`
       : ((item.source.slug === 'youtube' && item.published_at) ? `Published ${timeAgo(item.published_at)} (Trending ${timeAgo(item.fetched_at)})` : timeAgo(item.published_at || item.fetched_at));
 
+    const hasSnapshots = history.snapshots && history.snapshots.length >= 2;
+
     content.innerHTML = `
       <div class="drawer-header-bar">
         <div class="drawer-source-info">
@@ -411,6 +531,9 @@ async function openDetailDrawer(itemId) {
           <span class="drawer-source-name">${escapeHTML(item.source.display_name)}</span>
           <span class="${isCatA ? 'badge-cat-a' : 'badge-cat-b'}">${escapeHTML(item.source.source_type_label)}</span>
         </div>
+        <button class="card-star-btn ${state.bookmarks.includes(item.id) ? 'active' : ''}" id="drawer-star-btn" title="Save Bookmark" style="font-size: 20px;">
+          ${state.bookmarks.includes(item.id) ? '★' : '☆'}
+        </button>
       </div>
 
       <h2 class="drawer-headline">
@@ -421,6 +544,7 @@ async function openDetailDrawer(itemId) {
         <div class="drawer-tags-cluster">
           <span class="category-pill">${escapeHTML(item.category ? item.category.name : "Trending")}</span>
           ${regionChipHTML(item.trending_region)}
+          ${getMomentumBadgeHTML(item.momentum)}
         </div>
         <div class="drawer-meta-author-time">
           ${timeAndAuthorText}
@@ -445,8 +569,28 @@ async function openDetailDrawer(itemId) {
         </div>
       ` : ""}
 
+      <!-- Trend History & Velocity Section -->
+      <div class="drawer-history-section">
+        <div class="drawer-history-header">
+          <span class="drawer-history-title">📈 Trend Velocity & History</span>
+          <span class="chart-badge">${history.snapshots ? history.snapshots.length : 0} observations</span>
+        </div>
+        ${hasSnapshots ? `
+          <div class="drawer-chart-container">
+            <canvas id="drawer-history-chart"></canvas>
+          </div>
+          <div class="history-explanation-text">
+            ${escapeHTML(getMomentumExplanation(item.momentum))}
+          </div>
+        ` : `
+          <div class="history-explanation-text" style="border-left-color: #94a3c2;">
+            Momentum needs a few fetch cycles to appear. Snapshots are recorded on each scheduled run.
+          </div>
+        `}
+      </div>
+
       <!-- Data Source Provenance Box -->
-      <div class="provenance-card">
+      <div class="provenance-card" style="margin-top:20px;">
         <div class="provenance-title">Data Source Provenance</div>
         <div class="provenance-desc">${provenanceDescription}</div>
       </div>
@@ -455,6 +599,70 @@ async function openDetailDrawer(itemId) {
         ${ctaButtonCopy}
       </a>
     `;
+
+    // Attach drawer star button
+    const drawerStarBtn = content.querySelector("#drawer-star-btn");
+    if (drawerStarBtn) {
+      drawerStarBtn.addEventListener("click", () => {
+        toggleBookmark(item.id);
+        const isNowSaved = state.bookmarks.includes(item.id);
+        drawerStarBtn.classList.toggle("active", isNowSaved);
+        drawerStarBtn.textContent = isNowSaved ? "★" : "☆";
+      });
+    }
+
+    // Render Drawer History Line Chart if snapshots available
+    if (hasSnapshots && window.Chart) {
+      const histCanvas = content.querySelector("#drawer-history-chart");
+      if (histCanvas) {
+        const hasEng = history.snapshots.some(s => s.engagement_value !== null);
+        const chartData = hasEng
+          ? history.snapshots.map(s => s.engagement_value || 0)
+          : history.snapshots.map(s => s.rank || 0);
+
+        new window.Chart(histCanvas, {
+          type: "line",
+          data: {
+            labels: history.snapshots.map(s => new Date(s.captured_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })),
+            datasets: [{
+              label: hasEng ? "Engagement" : "Rank",
+              data: chartData,
+              borderColor: "#2dd4c8",
+              backgroundColor: "rgba(45, 212, 200, 0.12)",
+              fill: true,
+              tension: 0.3,
+              pointRadius: 4,
+              pointBackgroundColor: "#2dd4c8"
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: "#121729",
+                titleColor: "#e7ebf5",
+                bodyColor: "#94a3c2",
+                borderColor: "rgba(148, 163, 184, 0.25)",
+                borderWidth: 1
+              }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: "#94a3c2", font: { family: "JetBrains Mono", size: 10 } }
+              },
+              y: {
+                reverse: !hasEng,
+                grid: { color: "rgba(148, 163, 184, 0.08)" },
+                ticks: { color: "#94a3c2", font: { family: "JetBrains Mono", size: 10 }, precision: 0 }
+              }
+            }
+          }
+        });
+      }
+    }
   } catch (err) {
     content.innerHTML = `<div style="color:var(--negative); padding:20px;">Failed to load item: ${escapeHTML(err.message)}</div>`;
   }
@@ -509,6 +717,91 @@ async function fetchAndRenderTrends() {
   }
 }
 
+// ============================================================
+// Client Utilities (Watchlist, Bookmarks, CSV Export)
+// ============================================================
+
+function toggleBookmark(itemId) {
+  const idx = state.bookmarks.indexOf(itemId);
+  if (idx >= 0) {
+    state.bookmarks.splice(idx, 1);
+  } else {
+    state.bookmarks.push(itemId);
+  }
+  localStorage.setItem("socialpulse_bookmarks", JSON.stringify(state.bookmarks));
+  updateToolCounters();
+  renderTrendsGrid();
+}
+
+function addWatchlistKeyword(keyword) {
+  const kw = keyword.trim().toLowerCase();
+  if (kw && !state.watchlist.includes(kw)) {
+    state.watchlist.push(kw);
+    localStorage.setItem("socialpulse_watchlist", JSON.stringify(state.watchlist));
+    updateWatchlistTags();
+    renderTrendsGrid();
+  }
+}
+
+function removeWatchlistKeyword(keyword) {
+  state.watchlist = state.watchlist.filter(k => k !== keyword);
+  localStorage.setItem("socialpulse_watchlist", JSON.stringify(state.watchlist));
+  updateWatchlistTags();
+  renderTrendsGrid();
+}
+
+function updateWatchlistTags() {
+  const row = document.getElementById("watchlist-tags-row");
+  const list = document.getElementById("watchlist-tags-list");
+  const countEl = document.getElementById("watchlist-count");
+  if (countEl) countEl.textContent = state.watchlist.length;
+
+  if (!row || !list) return;
+  if (state.watchlist.length === 0) {
+    row.style.display = "none";
+    list.innerHTML = "";
+    return;
+  }
+
+  row.style.display = "flex";
+  list.innerHTML = state.watchlist.map(kw => `
+    <span class="watchlist-tag-pill">
+      ${escapeHTML(kw)}
+      <button class="remove-tag-btn" data-kw="${escapeHTML(kw)}" title="Remove keyword">×</button>
+    </span>
+  `).join("");
+
+  list.querySelectorAll(".remove-tag-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const kw = btn.getAttribute("data-kw");
+      removeWatchlistKeyword(kw);
+    });
+  });
+}
+
+function updateToolCounters() {
+  const savedCountEl = document.getElementById("saved-count");
+  if (savedCountEl) savedCountEl.textContent = state.bookmarks.length;
+  const watchCountEl = document.getElementById("watchlist-count");
+  if (watchCountEl) watchCountEl.textContent = state.watchlist.length;
+}
+
+function handleDownloadCSV() {
+  const params = new URLSearchParams();
+  if (state.activeSource && state.activeSource !== "all") {
+    params.append("source", state.activeSource);
+  }
+  if (state.sourceCategory && state.sourceCategory !== "all") {
+    params.append("source_category", state.sourceCategory);
+  }
+  if (state.recency) params.append("recency", state.recency);
+  if (state.regionScope) params.append("region_scope", state.regionScope);
+  if (state.category) params.append("category", state.category);
+  if (state.sort) params.append("sort", state.sort);
+
+  window.location.href = `/api/v1/trends/export.csv?${params.toString()}`;
+}
+
 async function loadInitialData() {
   try {
     const [sourcesData, categoriesData] = await Promise.all([
@@ -521,6 +814,8 @@ async function loadInitialData() {
 
     renderSourceTabs();
     renderCategoryFilter();
+    updateToolCounters();
+    updateWatchlistTags();
     await fetchAndRenderTrends();
   } catch (err) {
     console.error("Initial load failed:", err);
@@ -533,6 +828,42 @@ async function loadInitialData() {
 
 document.addEventListener("DOMContentLoaded", () => {
   initNetworkCanvas();
+
+  // Watchlist & Bookmark Filters
+  const watchlistToggleBtn = document.getElementById("watchlist-toggle-btn");
+  if (watchlistToggleBtn) {
+    watchlistToggleBtn.addEventListener("click", () => {
+      state.filterWatchlistOnly = !state.filterWatchlistOnly;
+      watchlistToggleBtn.classList.toggle("active", state.filterWatchlistOnly);
+      renderTrendsGrid();
+    });
+  }
+
+  const watchlistInput = document.getElementById("watchlist-input");
+  if (watchlistInput) {
+    watchlistInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && watchlistInput.value.trim()) {
+        e.preventDefault();
+        addWatchlistKeyword(watchlistInput.value);
+        watchlistInput.value = "";
+      }
+    });
+  }
+
+  const savedToggleBtn = document.getElementById("saved-toggle-btn");
+  if (savedToggleBtn) {
+    savedToggleBtn.addEventListener("click", () => {
+      state.filterSavedOnly = !state.filterSavedOnly;
+      savedToggleBtn.classList.toggle("active", state.filterSavedOnly);
+      renderTrendsGrid();
+    });
+  }
+
+  // Download CSV
+  const downloadCsvBtn = document.getElementById("download-csv-btn");
+  if (downloadCsvBtn) {
+    downloadCsvBtn.addEventListener("click", handleDownloadCSV);
+  }
 
   // Recency Pills
   const recencyContainer = document.getElementById("recency-pills");
@@ -607,6 +938,59 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Client-Side Hash Router
+  function handleRoute() {
+    const hash = window.location.hash || "#/feed";
+    if (hash.startsWith("#/analytics")) {
+      switchView("analytics");
+    } else if (hash.startsWith("#/topics")) {
+      switchView("topics");
+    } else if (hash.startsWith("#/health")) {
+      switchView("health");
+    } else {
+      switchView("feed");
+    }
+  }
+
+  function switchView(viewName) {
+    const views = {
+      feed: document.getElementById("feed-view-container"),
+      topics: document.getElementById("topics-view-container"),
+      analytics: document.getElementById("analytics-view-container"),
+      health: document.getElementById("health-view-container")
+    };
+
+    const navTabs = document.querySelectorAll(".nav-tab");
+    navTabs.forEach((tab) => {
+      if (tab.getAttribute("data-view") === viewName) {
+        tab.classList.add("active");
+      } else {
+        tab.classList.remove("active");
+      }
+    });
+
+    Object.keys(views).forEach((k) => {
+      if (views[k]) {
+        views[k].style.display = k === viewName ? "block" : "none";
+      }
+    });
+
+    if (viewName !== "health") {
+      stopHealthAutoRefresh();
+    }
+
+    if (viewName === "analytics" && views.analytics) {
+      renderAnalyticsView(views.analytics);
+    } else if (viewName === "health" && views.health) {
+      renderHealthView(views.health);
+    } else if (viewName === "topics" && views.topics) {
+      renderTopicsView(views.topics);
+    }
+  }
+
+  window.addEventListener("hashchange", handleRoute);
+
   // Initial Load
   loadInitialData();
+  handleRoute();
 });

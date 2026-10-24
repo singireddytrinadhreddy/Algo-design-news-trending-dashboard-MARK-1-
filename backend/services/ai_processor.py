@@ -14,12 +14,10 @@ from backend.utils.translator import is_non_english
 logger = logging.getLogger("socialpulse.ai_processor")
 
 PREFERRED_MODELS = [
-    "gemini-3.8-flash",
-    "gemini-flash-latest",
-    "gemini-flash-lite-latest",
-    "gemini-3.7-flash",
-    "gemini-3.5-flash-lite",
-    "gemini-3.6-flash"
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash"
 ]
 
 BATCH_SIZE = 8

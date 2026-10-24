@@ -58,6 +58,13 @@ async def run_pipeline(
                             error_message=str(e)
                         ))
 
+            # Run topic clustering after full pipeline fetch cycle completes
+            try:
+                from backend.services.clustering import run_topic_clustering
+                await run_topic_clustering(db)
+            except Exception as cluster_err:
+                print(f"[Orchestrator] Topic clustering execution notice: {cluster_err}")
+
     return results
 
 def get_pipeline_status_data(db: Session) -> dict:

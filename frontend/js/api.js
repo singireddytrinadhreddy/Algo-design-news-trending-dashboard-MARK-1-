@@ -83,5 +83,33 @@ export const api = {
   // Health
   async getHealth() {
     return request("/health");
+  },
+
+  // Analytics
+  async getAnalyticsOverview(recency = "24h") {
+    return request(`${API_BASE}/analytics/overview?recency=${recency}`);
+  },
+
+  // Source Health Observatory
+  async getSourceHealth() {
+    return request(`${API_BASE}/sources/health`);
+  },
+
+  async getSourceLogs(slug, limit = 20) {
+    return request(`${API_BASE}/sources/${slug}/logs?limit=${limit}`);
+  },
+
+  // Macro Topics
+  async getTopics({ minSources = 2, recency = "24h" } = {}) {
+    return request(`${API_BASE}/topics?min_sources=${minSources}&recency=${recency}`);
+  },
+
+  async getTopicById(id) {
+    return request(`${API_BASE}/topics/${id}`);
+  },
+
+  // Trend History & Momentum
+  async getTrendHistory(id) {
+    return request(`${API_BASE}/trends/${id}/history`);
   }
 };

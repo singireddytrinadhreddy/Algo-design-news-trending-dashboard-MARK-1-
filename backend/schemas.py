@@ -48,6 +48,57 @@ class SourceListResponse(BaseModel):
 
 
 # ============================================================
+# Source Health Observatory Schemas
+# ============================================================
+
+class SourceLastFetchDetail(BaseModel):
+    status: str
+    started_at: datetime
+    completed_at: datetime | None = None
+    duration_ms: int
+    items_fetched: int
+    items_new: int
+    error_message: str | None = None
+
+class SourceHealthItem(BaseModel):
+    slug: str
+    display_name: str
+    source_category: str
+    is_enabled: bool
+    fetch_interval_min: int
+    last_fetch: SourceLastFetchDetail | None = None
+    success_rate_24h: float
+    avg_duration_ms_24h: int
+    items_24h: int
+    health_state: str  # "healthy" | "stale" | "degraded" | "error" | "disabled" | "never_run"
+
+class SourceHealthResponse(BaseModel):
+    sources: list[SourceHealthItem]
+    total_sources: int
+    healthy_count: int
+    degraded_count: int
+    error_count: int
+
+class FetchLogItemResponse(BaseModel):
+    id: int
+    source_id: int
+    status: str
+    items_fetched: int
+    items_new: int
+    error_message: str | None = None
+    duration_ms: int
+    started_at: datetime
+    completed_at: datetime | None = None
+
+    class Config:
+        from_attributes = True
+
+class SourceLogsResponse(BaseModel):
+    source_slug: str
+    logs: list[FetchLogItemResponse]
+
+
+# ============================================================
 # Category Schemas
 # ============================================================
 
@@ -78,6 +129,12 @@ class TrendRegion(BaseModel):
     scope: str  # "local" | "country" | "global"
     basis: str
 
+class TrendMomentumInfo(BaseModel):
+    state: str  # "surging", "cooling", "peaking", "steady", "new", "tracking"
+    rank_delta: int | None = None
+    growth_per_hour: float | None = None
+    points: list[int] = []
+
 class TrendItemResponse(BaseModel):
     id: int
     source_id: int
@@ -100,6 +157,9 @@ class TrendItemResponse(BaseModel):
     location_india: str | None = None
     ai_processed: bool = False
     raw_json: str | None = None
+    topic_id: int | None = None
+    topic_title: str | None = None
+    momentum: TrendMomentumInfo | None = None
     source: SourceResponse
 
     class Config:
@@ -167,3 +227,103 @@ class HealthResponse(BaseModel):
     mock_ai_mode: bool
     database_connected: bool
     sources_enabled: int
+
+
+# ============================================================
+# Analytics Schemas
+# ============================================================
+
+class CategoryBreakdownItem(BaseModel):
+    name: str
+    color: str | None = None
+    count: int
+
+class PlatformShareItem(BaseModel):
+    slug: str
+    display_name: str
+    source_category: str
+    item_count: int
+
+class TopLocationItem(BaseModel):
+    location: str
+    count: int
+
+class HourlyVolumeItem(BaseModel):
+    hour: str
+    count: int
+
+class AICoverageStats(BaseModel):
+    processed: int
+    pending: int
+    percent: float
+
+class AnalyticsTotals(BaseModel):
+    total_items: int
+    active_sources: int
+    last_pipeline_run_time: datetime | None = None
+
+class AnalyticsOverviewResponse(BaseModel):
+    category_breakdown: list[CategoryBreakdownItem]
+    platform_share: list[PlatformShareItem]
+    source_category_ratio: dict[str, int]
+    top_locations: list[TopLocationItem]
+    hourly_volume: list[HourlyVolumeItem]
+    ai_coverage: AICoverageStats
+    totals: AnalyticsTotals
+    recency: str
+
+
+# ============================================================
+# Macro Topics (Cross-Platform Clustering) Schemas
+# ============================================================
+
+class TopicListItemResponse(BaseModel):
+    id: int
+    title: str
+    summary: str | None = None
+    source_count: int
+    item_count: int
+    sources: list[str]
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class TopicDetailResponse(BaseModel):
+    id: int
+    title: str
+    summary: str | None = None
+    source_count: int
+    item_count: int
+    sources: list[str]
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    items: list[TrendItemResponse]
+
+class TopicListResponse(BaseModel):
+    total_topics: int
+    topics: list[TopicListItemResponse]
+
+
+# ============================================================
+# Trend History & Snapshots Schemas
+# ============================================================
+
+class TrendSnapshotPoint(BaseModel):
+    captured_at: datetime
+    rank: int | None = None
+    engagement_value: int | None = None
+    secondary_value: int | None = None
+
+    class Config:
+        from_attributes = True
+
+class TrendHistoryResponse(BaseModel):
+    item_id: int
+    title: str
+    source_slug: str
+    total_snapshots: int
+    snapshots: list[TrendSnapshotPoint]

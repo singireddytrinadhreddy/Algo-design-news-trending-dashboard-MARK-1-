@@ -17,6 +17,8 @@ services:
         value: "youtube,mastodon,bluesky,google_trends,instagram_news,facebook_news,twitter_news,reddit_news,twitch_news"
       - key: PIPELINE_INTERVAL_MINUTES
         value: "15"
+      - key: DATABASE_URL
+        sync: false
       - key: GEMINI_KEY
         sync: false
       - key: YOUTUBE_API_KEY

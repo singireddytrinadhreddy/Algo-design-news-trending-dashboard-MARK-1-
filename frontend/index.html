@@ -47,62 +47,126 @@
           Refresh
         </button>
       </div>
+
+      <!-- Top Main Navigation -->
+      <nav class="main-nav" aria-label="Main Navigation">
+        <a href="#/feed" class="nav-tab active" data-view="feed" id="nav-tab-feed">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Live Feed
+        </a>
+        <a href="#/topics" class="nav-tab" data-view="topics" id="nav-tab-topics">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Macro Stories
+        </a>
+        <a href="#/analytics" class="nav-tab" data-view="analytics" id="nav-tab-analytics">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics
+        </a>
+        <a href="#/health" class="nav-tab" data-view="health" id="nav-tab-health">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Source Health
+        </a>
+      </nav>
     </header>
 
-    <!-- Source Tabs Bar -->
-    <div class="source-tabs-wrapper" role="region" aria-label="Social Media Platforms">
-      <div class="source-tabs-scroll" id="source-tabs-container" role="tablist">
-        <!-- Rendered dynamically by app.js -->
-      </div>
-    </div>
-
-    <!-- Filter Bar -->
-    <section class="filter-bar" aria-label="Feed Filters">
-      <div class="filter-group">
-        <span class="filter-label" id="recency-label">Recency</span>
-        <div class="recency-pills" id="recency-pills" role="radiogroup" aria-labelledby="recency-label">
-          <button class="recency-btn" data-hours="6h" role="radio" aria-checked="false">Past 6h</button>
-          <button class="recency-btn" data-hours="12h" role="radio" aria-checked="false">Past 12h</button>
-          <button class="recency-btn active" data-hours="24h" role="radio" aria-checked="true">Past 24h</button>
+    <!-- VIEW CONTAINERS -->
+    
+    <!-- Feed View Container -->
+    <div id="feed-view-container">
+      <!-- Source Tabs Bar -->
+      <div class="source-tabs-wrapper" role="region" aria-label="Social Media Platforms">
+        <div class="source-tabs-scroll" id="source-tabs-container" role="tablist">
+          <!-- Rendered dynamically by app.js -->
         </div>
       </div>
 
-      <div class="filter-group">
-        <label class="filter-label" for="region-filter">Region</label>
-        <select class="filter-select" id="region-filter" aria-label="Filter by region scope">
-          <option value="">All Regions</option>
-          <option value="india">India (Local & Country)</option>
-          <option value="local">Local India Only</option>
-          <option value="global">Global Only</option>
-        </select>
+      <!-- Filter Bar -->
+      <section class="filter-bar" aria-label="Feed Filters">
+        <div class="filter-group">
+          <span class="filter-label" id="recency-label">Recency</span>
+          <div class="recency-pills" id="recency-pills" role="radiogroup" aria-labelledby="recency-label">
+            <button class="recency-btn" data-hours="6h" role="radio" aria-checked="false">Past 6h</button>
+            <button class="recency-btn" data-hours="12h" role="radio" aria-checked="false">Past 12h</button>
+            <button class="recency-btn active" data-hours="24h" role="radio" aria-checked="true">Past 24h</button>
+          </div>
+        </div>
 
-        <label class="filter-label" for="category-filter">Category</label>
-        <select class="filter-select" id="category-filter" aria-label="Filter by topic category">
-          <option value="">All Categories</option>
-          <!-- Populated dynamically -->
-        </select>
+        <div class="filter-group">
+          <label class="filter-label" for="region-filter">Region</label>
+          <select class="filter-select" id="region-filter" aria-label="Filter by region scope">
+            <option value="">All Regions</option>
+            <option value="india">India (Local & Country)</option>
+            <option value="local">Local India Only</option>
+            <option value="global">Global Only</option>
+          </select>
 
-        <label class="filter-label" for="sort-filter">Sort</label>
-        <select class="filter-select" id="sort-filter" aria-label="Sort items">
-          <option value="recency">Most Recent</option>
-          <option value="engagement">Highest Engagement</option>
-        </select>
+          <label class="filter-label" for="category-filter">Category</label>
+          <select class="filter-select" id="category-filter" aria-label="Filter by topic category">
+            <option value="">All Categories</option>
+            <!-- Populated dynamically -->
+          </select>
+
+          <label class="filter-label" for="sort-filter">Sort</label>
+          <select class="filter-select" id="sort-filter" aria-label="Sort items">
+            <option value="recency">Most Recent</option>
+            <option value="engagement">Highest Engagement</option>
+            <option value="momentum">🔥 Rising now (Momentum)</option>
+          </select>
+        </div>
+
+        <div class="filter-group client-tools-group">
+          <!-- Watchlist Toggle & Input -->
+          <div class="watchlist-control-box">
+            <button class="tool-toggle-btn" id="watchlist-toggle-btn" title="Filter to items matching your saved watchlist keywords">
+              ★ Watchlist (<span id="watchlist-count">0</span>)
+            </button>
+            <div class="watchlist-input-wrapper">
+              <input type="text" id="watchlist-input" class="watchlist-input" placeholder="+ Keyword" aria-label="Add watchlist keyword" />
+            </div>
+          </div>
+
+          <!-- Bookmarks Toggle -->
+          <button class="tool-toggle-btn" id="saved-toggle-btn" title="View your bookmarked trends">
+            ⭐ Saved (<span id="saved-count">0</span>)
+          </button>
+
+          <!-- CSV Export Button -->
+          <button class="export-csv-btn" id="download-csv-btn" title="Download CSV export of current filtered trends">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+
+        <div class="stats-counter" id="results-counter" aria-live="polite">
+          Loading items...
+        </div>
+      </section>
+
+      <!-- Watchlist Active Keywords Row -->
+      <div class="watchlist-tags-row" id="watchlist-tags-row" style="display: none;">
+        <span class="tags-row-label">Active Keywords:</span>
+        <div class="watchlist-tags-list" id="watchlist-tags-list"></div>
       </div>
 
-      <div class="stats-counter" id="results-counter" aria-live="polite">
-        Loading items...
-      </div>
-    </section>
+      <!-- Main Content Area: Trends Grid -->
+      <main class="trends-grid-container" id="main-content">
+        <div class="trends-grid" id="trends-grid" aria-live="polite">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+        <nav class="pagination-area" id="pagination-controls" aria-label="Pagination">
+          <!-- Pagination buttons rendered here -->
+        </nav>
+      </main>
+    </div>
 
-    <!-- Main Content Area: Trends Grid -->
-    <main class="trends-grid-container" id="main-content">
-      <div class="trends-grid" id="trends-grid" aria-live="polite">
-        <!-- Rendered dynamically by app.js -->
-      </div>
-      <nav class="pagination-area" id="pagination-controls" aria-label="Pagination">
-        <!-- Pagination buttons rendered here -->
-      </nav>
-    </main>
+    <!-- Topics View Container -->
+    <div id="topics-view-container" style="display: none;"></div>
+
+    <!-- Analytics View Container -->
+    <div id="analytics-view-container" style="display: none;"></div>
+
+    <!-- Source Health View Container -->
+    <div id="health-view-container" style="display: none;"></div>
 
   </div>
 
@@ -116,6 +180,7 @@
   </aside>
 
   <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script type="module" src="/static/js/app.js"></script>
 </body>
 </html>

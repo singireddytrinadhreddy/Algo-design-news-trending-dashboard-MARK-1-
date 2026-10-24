@@ -99,8 +99,10 @@ INITIAL_SOURCES = [
 ]
 
 def init_db():
-    """Create all tables in the database."""
+    """Create all tables in the database and run dynamic migrations."""
     Base.metadata.create_all(bind=engine)
+    from backend.migrations import run_startup_migrations
+    run_startup_migrations(engine)
 
 def seed_db(db: Session | None = None):
     """Seed initial sources and categories if missing."""

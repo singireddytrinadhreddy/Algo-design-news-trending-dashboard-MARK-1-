@@ -15,7 +15,7 @@ from backend.services.orchestrator import run_pipeline
 from backend.services.ai_processor import process_unprocessed_items
 from backend.services.scheduler import start_scheduler, stop_scheduler
 from backend.routers import (
-    trends_router, sources_router, categories_router, pipeline_router
+    trends_router, sources_router, categories_router, pipeline_router, analytics_router, topics_router
 )
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
@@ -80,6 +80,8 @@ app.include_router(trends_router)
 app.include_router(sources_router)
 app.include_router(categories_router)
 app.include_router(pipeline_router)
+app.include_router(analytics_router)
+app.include_router(topics_router)
 
 # Mount static frontend directory if it exists
 if not FRONTEND_DIR.exists():
@@ -126,6 +128,8 @@ def read_root():
             "trends": "/api/v1/trends",
             "sources": "/api/v1/sources",
             "categories": "/api/v1/categories",
-            "pipeline": "/api/v1/pipeline/status"
+            "pipeline": "/api/v1/pipeline/status",
+            "analytics": "/api/v1/analytics/overview",
+            "topics": "/api/v1/topics"
         }
     })

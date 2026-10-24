@@ -4,7 +4,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -188,6 +188,7 @@ class AbstractFetcher(ABC):
             all_cats = db.query(Category).all()
             cat_map = {c.name.lower(): c.id for c in all_cats}
             default_cat_id = cat_map.get("other") or (all_cats[0].id if all_cats else None)
+            upserted_items: list[TrendingItem] = []
 
             for item in normalized_items:
                 full_text = f"{item.title} {item.description or ''}".strip()
@@ -222,6 +223,7 @@ class AbstractFetcher(ABC):
                         existing.category_id = initial_cat_id
                     if not existing.location_india and initial_loc:
                         existing.location_india = initial_loc
+                    upserted_items.append(existing)
                 else:
                     new_item = TrendingItem(
                         source_id=source.id,
@@ -246,7 +248,33 @@ class AbstractFetcher(ABC):
                         ai_processed=False
                     )
                     db.add(new_item)
+                    db.flush()
+                    upserted_items.append(new_item)
                     items_new += 1
+
+            # Snapshot Creation for items with rank or engagement_value
+            from backend.models import TrendSnapshot
+            cutoff_5m = now - timedelta(minutes=5)
+            recent_snap_ids = {
+                r[0] for r in db.query(TrendSnapshot.item_id).filter(
+                    TrendSnapshot.source_id == source.id,
+                    TrendSnapshot.captured_at >= cutoff_5m
+                ).all()
+            }
+
+            for itm in upserted_items:
+                has_metric = (itm.rank is not None) or (itm.engagement_value is not None)
+                if has_metric and itm.id not in recent_snap_ids:
+                    snap = TrendSnapshot(
+                        item_id=itm.id,
+                        source_id=source.id,
+                        captured_at=now,
+                        rank=itm.rank,
+                        engagement_value=itm.engagement_value,
+                        secondary_value=itm.secondary_value
+                    )
+                    db.add(snap)
+                    recent_snap_ids.add(itm.id)
 
             db.commit()
 
