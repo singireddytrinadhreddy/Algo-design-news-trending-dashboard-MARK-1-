@@ -826,7 +826,7 @@ async function loadInitialData() {
 // Event Listeners & Bootstrapping
 // ============================================================
 
-document.addEventListener("DOMContentLoaded", () => {
+function initSocialPulse() {
   initNetworkCanvas();
 
   // Watchlist & Bookmark Filters
@@ -993,4 +993,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initial Load
   loadInitialData();
   handleRoute();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSocialPulse);
+} else {
+  initSocialPulse();
+}

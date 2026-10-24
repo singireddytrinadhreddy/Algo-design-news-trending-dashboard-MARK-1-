@@ -123,10 +123,11 @@ def get_trends(
     )
 
     # 1. Source filtering
-    if source:
+    if source and not hasattr(source, "default"):
         # Handle comma-separated slugs if passed as single string
         slugs = []
-        for s in source:
+        source_list = [source] if isinstance(source, str) else list(source)
+        for s in source_list:
             slugs.extend([part.strip() for part in s.split(",") if part.strip()])
         if slugs:
             query = query.filter(Source.slug.in_(slugs))
@@ -265,9 +266,10 @@ def export_trends_csv(
         joinedload(TrendingItem.category)
     )
 
-    if source:
+    if source and not hasattr(source, "default"):
         slugs = []
-        for s in source:
+        source_list = [source] if isinstance(source, str) else list(source)
+        for s in source_list:
             slugs.extend([part.strip() for part in s.split(",") if part.strip()])
         if slugs:
             query = query.filter(Source.slug.in_(slugs))

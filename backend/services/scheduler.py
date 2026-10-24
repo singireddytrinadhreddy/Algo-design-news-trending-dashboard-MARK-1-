@@ -76,7 +76,9 @@ def start_scheduler():
                 trigger=IntervalTrigger(minutes=interval_min, start_date=start_date),
                 args=[src.slug],
                 id=job_id,
-                replace_existing=True
+                replace_existing=True,
+            misfire_grace_time=300,
+            coalesce=True
             )
             print(f"[Scheduler] Registered '{src.slug}' (Cat {src.source_category}) every {interval_min}m, starting at {start_date.strftime('%H:%M:%S')}")
 
@@ -86,7 +88,9 @@ def start_scheduler():
             job_ai_sweep,
             trigger=IntervalTrigger(minutes=5, start_date=ai_start_date),
             id="ai_sweep",
-            replace_existing=True
+            replace_existing=True,
+            misfire_grace_time=300,
+            coalesce=True
         )
         print(f"[Scheduler] Registered AI sweep every 5m, starting at {ai_start_date.strftime('%H:%M:%S')}")
 
@@ -96,7 +100,9 @@ def start_scheduler():
             job_topic_clustering,
             trigger=IntervalTrigger(minutes=30, start_date=cluster_start_date),
             id="topic_clustering",
-            replace_existing=True
+            replace_existing=True,
+            misfire_grace_time=300,
+            coalesce=True
         )
         print(f"[Scheduler] Registered Topic Clustering every 30m, starting at {cluster_start_date.strftime('%H:%M:%S')}")
 
@@ -106,7 +112,9 @@ def start_scheduler():
             job_prune_snapshots,
             trigger=IntervalTrigger(hours=1, start_date=prune_start_date),
             id="snapshot_pruning",
-            replace_existing=True
+            replace_existing=True,
+            misfire_grace_time=300,
+            coalesce=True
         )
         print(f"[Scheduler] Registered Snapshot Pruning every 1h, starting at {prune_start_date.strftime('%H:%M:%S')}")
     except Exception as e:
