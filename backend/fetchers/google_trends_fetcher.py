@@ -52,27 +52,31 @@ class GoogleTrendsFetcher(AbstractFetcher):
                 except Exception as e:
                     logger.warning(f"Error during Google Trends translation: {e}")
 
-            # Optionally enrich top 10 trends with state-level data via pytrends
+            # Optionally enrich top 3 trends with state-level data via pytrends in worker thread
+            def _enrich_pytrends(subset):
+                try:
+                    from pytrends.request import TrendReq
+                    pt = TrendReq(hl="en-US", tz=330, timeout=(3, 3))
+                    for it in subset:
+                        q = it.get("query")
+                        if not q:
+                            continue
+                        try:
+                            pt.build_payload([q], geo="IN")
+                            df = pt.interest_by_region(resolution="REGION")
+                            if not df.empty and q in df.columns:
+                                pos_df = df[df[q] > 0].sort_values(by=q, ascending=False)
+                                if not pos_df.empty:
+                                    top_states = pos_df.head(3).index.tolist()
+                                    if top_states:
+                                        it["location_india"] = ", ".join(top_states)
+                        except Exception:
+                            break
+                except Exception:
+                    pass
+
             try:
-                from pytrends.request import TrendReq
-                pt = TrendReq(hl="en-US", tz=330, timeout=(5, 5))
-                for it in items[:10]:
-                    q = it.get("query")
-                    if not q:
-                        continue
-                    try:
-                        await asyncio.sleep(0.3)  # short delay between calls
-                        pt.build_payload([q], geo="IN")
-                        df = pt.interest_by_region(resolution="REGION")
-                        if not df.empty and q in df.columns:
-                            pos_df = df[df[q] > 0].sort_values(by=q, ascending=False)
-                            if not pos_df.empty:
-                                top_states = pos_df.head(3).index.tolist()
-                                if top_states:
-                                    it["location_india"] = ", ".join(top_states)
-                    except Exception:
-                        # Skip silently on rate limit or failure, never invent a region
-                        pass
+                await asyncio.wait_for(asyncio.to_thread(_enrich_pytrends, items[:3]), timeout=4.0)
             except Exception:
                 pass
 

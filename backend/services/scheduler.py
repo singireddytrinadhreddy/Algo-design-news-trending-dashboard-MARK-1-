@@ -69,7 +69,7 @@ def start_scheduler():
 
         for idx, src in enumerate(enabled_sources):
             interval_min = src.fetch_interval_min or (15 if src.source_category == "A" else 60)
-            start_date = base_time + timedelta(seconds=idx * stagger_step_sec)
+            start_date = base_time + timedelta(minutes=interval_min, seconds=idx * stagger_step_sec)
             job_id = f"fetch_{src.slug}"
             scheduler.add_job(
                 job_fetch_source,
@@ -83,7 +83,7 @@ def start_scheduler():
             print(f"[Scheduler] Registered '{src.slug}' (Cat {src.source_category}) every {interval_min}m, starting at {start_date.strftime('%H:%M:%S')}")
 
         # Periodic AI Sweep (staggered after source fetches start)
-        ai_start_date = base_time + timedelta(seconds=max(1, len(enabled_sources)) * stagger_step_sec + 5)
+        ai_start_date = base_time + timedelta(minutes=5, seconds=5)
         scheduler.add_job(
             job_ai_sweep,
             trigger=IntervalTrigger(minutes=5, start_date=ai_start_date),
@@ -95,7 +95,7 @@ def start_scheduler():
         print(f"[Scheduler] Registered AI sweep every 5m, starting at {ai_start_date.strftime('%H:%M:%S')}")
 
         # Periodic Macro Topic Clustering (every 30 minutes)
-        cluster_start_date = base_time + timedelta(seconds=max(1, len(enabled_sources)) * stagger_step_sec + 20)
+        cluster_start_date = base_time + timedelta(minutes=30, seconds=20)
         scheduler.add_job(
             job_topic_clustering,
             trigger=IntervalTrigger(minutes=30, start_date=cluster_start_date),
@@ -107,7 +107,7 @@ def start_scheduler():
         print(f"[Scheduler] Registered Topic Clustering every 30m, starting at {cluster_start_date.strftime('%H:%M:%S')}")
 
         # Snapshot Pruning (once every hour)
-        prune_start_date = base_time + timedelta(seconds=max(1, len(enabled_sources)) * stagger_step_sec + 40)
+        prune_start_date = base_time + timedelta(hours=1, seconds=40)
         scheduler.add_job(
             job_prune_snapshots,
             trigger=IntervalTrigger(hours=1, start_date=prune_start_date),

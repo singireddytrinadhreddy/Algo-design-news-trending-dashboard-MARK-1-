@@ -435,7 +435,6 @@ function renderTrendsGrid() {
     });
   });
 }
-}
 
 function renderPagination() {
   const container = document.getElementById("pagination-controls");
