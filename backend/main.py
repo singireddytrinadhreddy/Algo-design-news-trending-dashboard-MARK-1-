@@ -1,9 +1,10 @@
 import os
+import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from backend.config import settings
@@ -19,6 +20,47 @@ from backend.routers import (
 )
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
+async def _start_ipv6_proxy():
+    """Bridges IPv6 [::1]:8000 to IPv4 127.0.0.1:8000 on Windows so that
+    browsers navigating to 'localhost:8000' never encounter ERR_CONNECTION_REFUSED.
+    """
+    async def _pipe(r, w):
+        try:
+            while True:
+                data = await r.read(65536)
+                if not data:
+                    break
+                w.write(data)
+                await w.drain()
+        except Exception:
+            pass
+        finally:
+            try:
+                w.close()
+            except Exception:
+                pass
+
+    async def _handle(reader_in, writer_in):
+        try:
+            reader_out, writer_out = await asyncio.open_connection("127.0.0.1", 8000)
+            await asyncio.gather(_pipe(reader_in, writer_out), _pipe(reader_out, writer_in))
+        except Exception:
+            pass
+        finally:
+            try:
+                writer_in.close()
+            except Exception:
+                pass
+
+    try:
+        import socket
+        server = await asyncio.start_server(_handle, "::1", 8000, family=socket.AF_INET6)
+        print("[IPv6 Proxy] Bridging [::1]:8000 -> 127.0.0.1:8000 for localhost browser compatibility.")
+        return server
+    except Exception:
+        return None
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -54,11 +96,14 @@ async def lifespan(app: FastAPI):
 
     # 2. Start APScheduler background jobs
     start_scheduler()
+    proxy_server = await _start_ipv6_proxy()
 
     yield
 
     # 3. Shutdown
     stop_scheduler()
+    if proxy_server:
+        proxy_server.close()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -133,3 +178,8 @@ def read_root():
             "topics": "/api/v1/topics"
         }
     })
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return Response(status_code=204)
