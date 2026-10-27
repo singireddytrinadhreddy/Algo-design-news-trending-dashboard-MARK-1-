@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 # Load .env file from project root
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / ".env", override=True)
 
 class Settings:
     PROJECT_NAME: str = "SocialPulse — Multi-Platform Social Media Trending Intelligence"

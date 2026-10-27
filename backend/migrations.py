@@ -35,6 +35,10 @@ def run_startup_migrations(engine: Engine):
                         logger.debug(f"Index creation notice: {idx_err}")
                     logger.info("Migration complete: 'topic_id' column added.")
 
+            # 2. Ensure comments table exists
+            from backend.models import Comment
+            Comment.__table__.create(bind=conn, checkfirst=True)
+
     except Exception as e:
         logger.error(f"Error during startup migrations: {e}", exc_info=True)
         # Non-fatal error logging so application startup continues if already migrated
